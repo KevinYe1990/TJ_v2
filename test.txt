@@ -1,0 +1,2 @@
+img2Path=desktop/test/hello.txt
+img1Path=another/desktop/ttttt/haha.txt
