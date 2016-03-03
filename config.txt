@@ -10,3 +10,4 @@ minDistance=
 blockSize=3
 useHarrisDetector=0
 k=0.04
+test=10222

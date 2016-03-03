@@ -42,6 +42,7 @@ SOURCES += \
     common.cpp
 
 QMAKE_CXXFLAGS += -fopenmp
+QMAKE_MAC_SDK = macosx10.11
 
-LIBS += -fopenmp
+#LIBS += -fopenmp
 
