@@ -6,12 +6,16 @@ using namespace std;
 static bool printConfigFile();
 
 //global variables
-string img1Path,img2Path;
+string img1Path,img2Path,configPath;
 Mat img1,img2;
 int c,except=0,number=0,found=0;
 
 
 int main(int argc, char *argv[]){
+    cout<<atoi("2.35")<<endl;
+    cout<<atof("2.35")<<endl;
+    cout<<str2bool(" false ")<<endl;
+    return 0;
     //load the configuration file
     char *filename=*++argv;
     --argc;

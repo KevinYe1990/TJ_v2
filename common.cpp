@@ -39,3 +39,20 @@ bool readConfigFile(const char *cfgfilepath, const string &key, string &value){
     }
     return -1;
 }
+
+void trimString(string &str){
+    int s=str.find_first_not_of(" ");
+    int e=str.find_last_not_of(" ");
+    str=str.substr(s,e-s+1);
+    return;
+}
+
+bool str2bool(string s){
+    trimString(s);
+    transform(s.begin(),s.end(),s.begin(),::tolower);
+    cout<<!strcmp(s.c_str(),"ture")<<endl;
+//    if()
+//        return true;
+//    else
+//        return false;
+}
