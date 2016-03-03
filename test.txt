@@ -1,2 +1,0 @@
-img2Path=/home/kevin/Documents/win7share/9059_l5_en.tif
-img1Path=/home/kevin/Documents/win7share/9058_l5_en.tif
