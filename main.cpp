@@ -8,6 +8,7 @@ static bool printConfigFile();
 //global variables
 string img1Path,img2Path;
 char *filename;
+
 Mat img1,img2;
 int c,except=0,number=0,found=0;
 
@@ -20,6 +21,7 @@ int main(int argc, char *argv[]){
         cerr<<"Error happened while opening the configuration file.\n";
         return -1;
     }
+
     //read key variables
     readConfigFile(filename,"img1Path",img1Path);
     img1=imread(img1Path);
@@ -58,6 +60,7 @@ static bool printConfigFile(){
     cout<<"First Image Path:\t"<<img1Path<<endl;
     cout<<"Second Image Path:\t"<<img2Path<<endl;
     cout<<endl;
+    return 0;
 }
 
 

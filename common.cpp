@@ -47,26 +47,54 @@ bool readConfigFile(const char *cfgfilepath, const string &key, string &value){
     cfgFile.open(cfgfilepath);
     if(!cfgFile.is_open()){
         cerr<<"Error happened while loading the configuration file!"<<endl<<endl;
-        return -1;
+        return 0;
     }
-    char tmp[1000];
+    string line;
     while(!cfgFile.eof()){
-        cfgFile.getline(tmp,1000);
-        if(tmp[0]=='#')
-            break;
+        getline(cfgFile,line,'\n');
+        if(line[0]=='#' || line.length()==0)
+            //
+            continue;
         else{
-            string line(tmp);
             size_t pos=line.find('=');
             if(pos==string::npos){
-                cerr<<"Error happened while reading the configuration file!"<<endl<<endl;
-                return -1;
+                cerr<<"Error happened while reading the configuration file!"<<endl;
+                cfgFile.close();
+                return 0;
             }
             string tmpKey=line.substr(0,pos);
             if(key==tmpKey){
                 value=line.substr(pos+1);
+                cfgFile.close();
                 return 1;
             }
         }
     }
-    return -1;
+    cfgFile.close();
+    return 0;
+}
+bool readConfigFile(const char *cfgfilepath, const string &key, int &value){
+    string strtmp;
+    bool b=readConfigFile(cfgfilepath,key,strtmp);
+    if(b){
+        value=atoi(strtmp.c_str());
+    }
+    return b;
+}
+
+bool readConfigFile(const char *cfgfilepath, const string &key, double &value){
+    string strtmp;
+    bool b=readConfigFile(cfgfilepath,key,strtmp);
+    if(b){
+        value=atof(strtmp.c_str());
+    }
+    return b;
+}
+bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
+    string strtmp;
+    bool b=readConfigFile(cfgfilepath,key,strtmp);
+    if(b){
+        value=str2bool(strtmp);
+    }
+    return b;
 }

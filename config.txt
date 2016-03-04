@@ -1,12 +1,8 @@
 #paths of image pair
 img2Path=/home/kevin/Documents/win7share/9059_l5_en.tif
 img1Path=/home/kevin/Documents/win7share/9058_l5_en.tif
-
 #feature type:1)good feature; 2)sift feature; 3)grid feature
 featuretype=1
-maxCorners=
-qualityLevel=
-minDistance=
 blockSize=3
 useHarrisDetector=0
 k=0.04
