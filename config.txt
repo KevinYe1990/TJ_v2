@@ -9,7 +9,7 @@ img1Path=/home/kevin/Documents/win7share/9058_l5_en.tif
 DisplayKeypoints=true
 #DisplayScale=2
 SaveKeypoints=true
-SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
+#SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
 #*********parameters of the good feature algorithm*********
 #maxCorners=2000
 #qualityLevel=0.001
@@ -20,4 +20,10 @@ SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
 #*********parameters of the sift algorithm*********
 #
 #*********parameters of the grid feature algorithm*********
-#
+#initFeatureScale=1f
+#featureScaleMul=0.1f
+#featureScaleLevels=1
+#initXyStep=10
+#initImgBound=0
+#varyXyStepWithScale=true
+#varyImgBoundWithScale=false

@@ -118,24 +118,28 @@ bool readConfigFile(const char *cfgfilepath, const string &key, string &value){
 bool readConfigFile(const char *cfgfilepath, const string &key, int &value){
     string strtmp;
     bool b=readConfigFile(cfgfilepath,key,strtmp);
-    if(b){
-        value=atoi(strtmp.c_str());
-    }
+    if(b) value=atoi(strtmp.c_str());
     return b;
 }
 bool readConfigFile(const char *cfgfilepath, const string &key, double &value){
     string strtmp;
     bool b=readConfigFile(cfgfilepath,key,strtmp);
-    if(b){
-        value=atof(strtmp.c_str());
-    }
+    if(b) value=atof(strtmp.c_str());
     return b;
 }
+
+bool readConfigFile(const char *cfgfilepath, const string &key, float &value){
+    double tmp=value;
+    bool b=readConfigFile(cfgfilepath,key,tmp);
+    if(b) value=(float)tmp;
+    return b;
+}
+
 bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
     string strtmp;
     bool b=readConfigFile(cfgfilepath,key,strtmp);
-    if(b){
-        value=str2bool(strtmp);
-    }
+    if(b) value=str2bool(strtmp);
     return b;
 }
+
+

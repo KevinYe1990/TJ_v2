@@ -3,15 +3,26 @@
 
 using namespace std;
 
-static bool printConfigFile();
-
-//global variables
-string img1Path,img2Path;
+//global variables and functions
+string img1Path,img2Path,directory;
 char *filename;
 Mat img1,img2;
-int c,except=0,number=0,found=0;
+int c/*,except=0,number=0,found=0*/;
+
+static bool printConfigFile();
+void getDirectory(string &str);
+
+void help(){
+    //guildline...
+}
 
 int main(int argc, char *argv[]){
+    //print help
+    help();
+
+    //initilize
+    getDirectory(directory);
+
     //load the configuration file
     filename=*++argv;
     --argc;
@@ -62,4 +73,7 @@ static bool printConfigFile(){
     return 0;
 }
 
-
+void getDirectory(string &str){
+    str=string(get_current_dir_name());
+    str.append("/");
+}

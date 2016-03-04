@@ -5,17 +5,17 @@ bool extractFeatures(char *type){
     Ptr<FeatureDetector> detector;
     vector<KeyPoint> keypoints;
     double scale=1;
-    string ImageID="left",outPath="";
-//    getcwd()
+    string ImageID="left",outPath=directory+"keypoints.txt";
     bool display=false;
     bool saveKpts=false;
-
+    //read common key variables
     readConfigFile(filename,"ImageID",ImageID);
     readConfigFile(filename,"DisplayScale",scale);
     readConfigFile(filename,"DisplayKeypoints",display);
     readConfigFile(filename,"SaveKeypoints",saveKpts);
     readConfigFile(filename,"SaveKeypointsPath",outPath);
     lowerString(ImageID);
+    //set detector
     switch(type[0])
     {
         case '1':
@@ -50,11 +50,37 @@ bool extractFeatures(char *type){
         case '2':
         {//Sift feature to track
             cout<<"Feature Extraction:\tSift feature to track..."<<endl<<endl;
+//            SiftFeatureDetector()
             break;
         }
         case '3':
         {//Grid feature to track
             cout<<"Feature Extraction:\tGrid feature to track..."<<endl<<endl;
+            /*DenseFeatureDetector(float initFeatureScale=1.f,int featureScaleLevels=1,float featureScaleMul=0.1f,
+                   int initXyStep=6,int initImgBound=0,bool varyXyStepWithScale=true,bool varyImgBoundWithScale=false)*/
+            float initFeatureScale=1.f,featureScaleMul=0.1f;
+            int featureScaleLevels=1,initXyStep=6,initImgBound=0;
+            bool varyXyStepWithScale=true,varyImgBoundWithScale=false;
+            //set parameters
+            readConfigFile(filename,"initFeatureScale",initFeatureScale);
+            readConfigFile(filename,"featureScaleMul",featureScaleMul);
+            readConfigFile(filename,"featureScaleLevels",featureScaleLevels);
+            readConfigFile(filename,"initXyStep",initXyStep);
+            readConfigFile(filename,"initImgBound",initImgBound);
+            readConfigFile(filename,"varyXyStepWithScale",varyXyStepWithScale);
+            readConfigFile(filename,"varyImgBoundWithScale",varyImgBoundWithScale);
+            //initialize feature detector
+            detector=new DenseFeatureDetector(initFeatureScale,featureScaleLevels,featureScaleMul,
+                                              initXyStep,initImgBound,varyXyStepWithScale,varyImgBoundWithScale);
+            //detect
+            if(ImageID=="left")
+                detector->detect(img1,keypoints);
+            else if(ImageID=="right")
+                detector->detect(img2,keypoints);
+            else{
+                detector->detect(img1,keypoints);
+                cerr<<"Unknown option for the image_id, the left image was detected instead!"<<endl;
+            }
             break;
         }
         default:
