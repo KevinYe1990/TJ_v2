@@ -3,6 +3,19 @@
 
 bool extractFeatures(char *type){
     Ptr<FeatureDetector> detector;
+    vector<KeyPoint> keypoints;
+    double scale=1;
+    string ImageID="left",outPath="";
+//    getcwd()
+    bool display=false;
+    bool saveKpts=false;
+
+    readConfigFile(filename,"ImageID",ImageID);
+    readConfigFile(filename,"DisplayScale",scale);
+    readConfigFile(filename,"DisplayKeypoints",display);
+    readConfigFile(filename,"SaveKeypoints",saveKpts);
+    readConfigFile(filename,"SaveKeypointsPath",outPath);
+    lowerString(ImageID);
     switch(type[0])
     {
         case '1':
@@ -11,19 +24,27 @@ bool extractFeatures(char *type){
             /*GoodFeaturesToTrackDetector( int maxCorners, double qualityLevel,
             double minDistance, int blockSize=3,bool useHarrisDetector=false, double k=0.04 );*/
             //initialize the parameters
-            int maxCorners,blockSize=5;
-            double qualityLevel,minDistance,k=0.04;
+            int maxCorners=1e8,blockSize=5;
+            double qualityLevel=0.01,minDistance=5,k=0.04;
             bool useHarrisDEtector=false;
-string tmp;
-//            readConfigFile(configPath,"maxCorners",maxCorners);
+            //set parameters
+            readConfigFile(filename,"maxCorners",maxCorners);
             readConfigFile(filename,"blockSize",blockSize);
-//            readConfigFile(configPath,"qualityLevel",qualityLevel);
+            readConfigFile(filename,"qualityLevel",qualityLevel);
             readConfigFile(filename,"minDistance",minDistance);
-//            readConfigFile(configPath,"k",k);
-//            readConfigFile(configPath,"useHarrisDEtector",useHarrisDEtector);
-
-//            detector=new GoodFeaturesToTrackDetector()
-                    //new GoodFeaturesToTrackDetector(2000,0.001,5,6,false,0.04);
+            readConfigFile(filename,"k",k);
+            readConfigFile(filename,"useHarrisDetector",useHarrisDEtector);
+            //initialize feature detector
+            detector=new GoodFeaturesToTrackDetector(maxCorners,qualityLevel,minDistance,blockSize,useHarrisDEtector,k);
+            //detect
+            if(ImageID=="left")
+                detector->detect(img1,keypoints);
+            else if(ImageID=="right")
+                detector->detect(img2,keypoints);
+            else{
+                detector->detect(img1,keypoints);
+                cerr<<"Unknown option for the image_id, the left image was detected instead!"<<endl;
+            }
             break;
         }
         case '2':
@@ -38,5 +59,15 @@ string tmp;
         }
         default:
             exitwithErrors("unknown type for feature extraction!");
+    }
+
+    if(display)
+        if(ImageID=="right")
+            showKeypoints(img2,keypoints,scale);
+        else
+            showKeypoints(img1,keypoints,scale);
+
+    if(saveKpts){
+        printKeypoints(outPath,keypoints);
     }
 }

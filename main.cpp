@@ -8,7 +8,6 @@ static bool printConfigFile();
 //global variables
 string img1Path,img2Path;
 char *filename;
-
 Mat img1,img2;
 int c,except=0,number=0,found=0;
 

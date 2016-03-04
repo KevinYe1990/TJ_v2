@@ -1,9 +1,23 @@
-#paths of image pair
+#**************************CONFIGURATION FOR TJ TO RUN************************
+#============================================================================#
+###paths of image pair
 img2Path=/home/kevin/Documents/win7share/9059_l5_en.tif
 img1Path=/home/kevin/Documents/win7share/9058_l5_en.tif
-#feature type:1)good feature; 2)sift feature; 3)grid feature
-featuretype=1
-blockSize=3
-useHarrisDetector=0
-k=0.04
-test=10222
+     
+###feature type:1)good feature; 2)sift feature; 3)grid feature
+#ImageID=left
+DisplayKeypoints=true
+#DisplayScale=2
+SaveKeypoints=true
+SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
+#*********parameters of the good feature algorithm*********
+#maxCorners=2000
+#qualityLevel=0.001
+#minDistance=5
+#blockSize=5
+#useHarrisDetector=false
+#k=0.04
+#*********parameters of the sift algorithm*********
+#
+#*********parameters of the grid feature algorithm*********
+#
