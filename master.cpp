@@ -48,9 +48,26 @@ bool extractFeatures(char *type){
             break;
         }
         case '2':
-        {//Sift feature to track
-            cout<<"Feature Extraction:\tSift feature to track..."<<endl<<endl;
-//            SiftFeatureDetector()
+        {//Fast feature to track
+            cout<<"Feature Extraction:\tFast feature to track..."<<endl<<endl;
+            /*  FastFeatureDetector(int threshold=10,bool nonmaxSuppression=true)*/
+            //initialize the parameters
+            int threshold=1;
+            bool nonmaxSuppression=true;
+            //set parameters
+            readConfigFile(filename,"threshold",threshold);
+            readConfigFile(filename,"nonmaxSuppression",nonmaxSuppression);
+            //initialize feature detector
+            detector=new FastFeatureDetector(threshold, nonmaxSuppression);
+            //detect
+            if(ImageID=="left")
+                detector->detect(img1,keypoints);
+            else if(ImageID=="right")
+                detector->detect(img2,keypoints);
+            else{
+                detector->detect(img1,keypoints);
+                cerr<<"Unknown option for the image_id, the left image was detected instead!"<<endl;
+            }
             break;
         }
         case '3':

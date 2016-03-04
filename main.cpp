@@ -74,6 +74,9 @@ static bool printConfigFile(){
 }
 
 void getDirectory(string &str){
-    str=string(get_current_dir_name());
+int _max_length=1000;
+char path[1000];
+getcwd(path,_max_length);
+str=string(path);
     str.append("/");
 }
