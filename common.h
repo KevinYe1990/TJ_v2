@@ -9,13 +9,16 @@
 #include "typeindex"
 #include <unistd.h>
 
+//OpenCV 2.4.9
 #include "opencv2/opencv.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/features2d/features2d.hpp"
+//Eigen 3
+#include "eigen3/Eigen/Eigen"
 
 using namespace std;
 using namespace cv;
-
+using namespace Eigen;
 
 extern Mat img1,img2;
 extern char *filename;
