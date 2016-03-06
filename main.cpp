@@ -41,10 +41,9 @@ int main(int argc, char *argv[]){
     while(--argc>0 && (*++argv)[0]=='-')
         while(c=*++argv[0])
             switch (c){
-            case 'p':
-            {
-                printConfigFile();
-                break;
+            case 'm':
+            {//match
+//                Mat r=
             }
             case 'f':
             {//feature types: 1)Good Feature; 2)Sift Feature; 3)Grid Feature;
@@ -54,6 +53,11 @@ int main(int argc, char *argv[]){
                     extractFeatures(type);
                 else
                     exitwithErrors("unknown type for feature extraction!");
+                break;
+            }
+            case 'p':
+            {
+                printConfigFile();
                 break;
             }
             default:
