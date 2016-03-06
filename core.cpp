@@ -1,4 +1,4 @@
-#include "master.h"
+#include "core.h"
 #include "common.h"
 
 bool extractFeatures(char *type){

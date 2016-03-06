@@ -1,6 +1,8 @@
 #include "common.h"
-#include "master.h"
+#include "core.h"
+#include "match.h"
 
+#define _debug
 using namespace std;
 
 //global variables and functions
@@ -17,6 +19,19 @@ void help(){
 }
 
 int main(int argc, char *argv[]){
+#ifdef _debug
+    vector<double> coeff;
+    vector<double> x_values={1,2,3,4};
+    vector<double> y_values={3,2,1,6};
+//    double x,y;
+//    while(scanf("%lf %lf\n",&x,&y)==2){
+//        x_values.push_back(x);
+//        y_values.push_back(y);
+//    }
+    polyfit(x_values,y_values,coeff,2);
+    printf("%f+%fx+%f*x^2\n",coeff[0],coeff[1],coeff[2]);
+    return 0;
+#endif
     //print help
     help();
 
@@ -66,8 +81,6 @@ int main(int argc, char *argv[]){
 
     return 0;
 }
-
-
 
 static bool printConfigFile(){
     cout<<"Configuration File Content:"<<endl;

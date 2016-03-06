@@ -13,8 +13,8 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/features2d/features2d.hpp"
-//Eigen 3
-#include "eigen3/Eigen/Eigen"
+//Eigen 3.2.8
+#include "Eigen/QR"
 
 using namespace std;
 using namespace cv;
@@ -25,7 +25,6 @@ extern char *filename;
 extern string directory;
 
 bool exitwithErrors(const char *msg);
-//int getTypeindex(const string t);
 void lowerString(string &str);
 void trimString(string &str);
 bool str2bool(string s);
