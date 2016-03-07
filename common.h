@@ -1,18 +1,20 @@
 #ifndef COMMON
 #define COMMON
 
-#include "iostream"
-#include "string.h"
-#include "fstream"
-#include "sstream"
-#include "algorithm"
-#include "typeindex"
+#include <iostream>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+//#include <typeindex>
 #include <unistd.h>
+#include <time.h>
 
 //OpenCV 2.4.9
 #include "opencv2/opencv.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/features2d/features2d.hpp"
+//#include "opencv2/core/eigen.hpp"
 //Eigen 3.2.8
 #include "Eigen/QR"
 
@@ -28,6 +30,8 @@ bool exitwithErrors(const char *msg);
 void lowerString(string &str);
 void trimString(string &str);
 bool str2bool(string s);
+//void Mat2Matrix(const Mat &src,Matrix &dst);
+//void Matrix2Mat();
 
 bool readConfigFile(const char *cfgfilepath, const string &key, string &value);
 bool readConfigFile(const char *cfgfilepath, const string &key, int &value);
@@ -37,8 +41,11 @@ bool readConfigFile(const char *cfgfilepath, const string &key, bool &value);
 
 void showImage(Mat &img,string title="TEST",double scale=1);
 void showKeypoints(const Mat img,const vector<KeyPoint> &kpts,double scale=1);
-
 void printKeypoints(std::string filename,const std::vector<cv::KeyPoint>& kpts);
+
+
+//_DEBUG
+Mat genRandMat(int rows,int cols,int depth=CV_8UC1);
 
 #endif // COMMON
 

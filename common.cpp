@@ -125,3 +125,48 @@ bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
     return b;
 }
 
+
+//void Mat2Matrix(const Mat &src,Matrix &dst)
+//{
+//    if(src.depth()==CV_64FC1){
+//        MatrixXd tmp1;
+//        cv2eigen(src,tmp1);
+//    }
+//    else if(src.depth()==CV_32FC1){
+//        MatrixXf tmp2;
+//        cv2eigen(src,tmp2);
+//    }else{
+//        exitwithErrors("unknown Mat type to be converted!");
+//    }
+//    dst=tmp;
+    //void cv2eigen(const Mat& src, Eigen::Matrix<_Tp, _rows, _cols, _options, _maxRows, _maxCols>& dst)
+//    convertTo(Mat,CV_64FC1,1/255.0)
+//}
+
+//DEBUG
+Mat genRandMat(int rows, int cols, int depth)
+{
+    assert(rows>0);
+    assert(cols>0);
+    Mat dst(rows,cols,depth);
+    srand((unsigned)time(NULL));
+    for(int i=0;i<rows;++i)
+        for(int j=0;j<cols;++j){
+            double r=rand()%256;
+            switch(depth){
+                case CV_32FC1:{
+                    dst.at<float>(i,j)=(float)(r/256.0);
+                    break;
+                }
+                case CV_64FC1:{
+                    dst.at<double>(i,j)=r/256.0;
+                    break;
+                }
+                default:{
+                    dst.at<uchar>(i,j)=(int)r;
+                    break;
+                }
+            }
+        }
+    return dst;
+}
