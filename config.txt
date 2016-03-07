@@ -28,3 +28,6 @@ threshold=5;
 #initImgBound=0
 #varyXyStepWithScale=true
 #varyImgBoundWithScale=false
+
+#*********Terrain Controls for Matching*********
+terrainCtrlsPath=/home/kevin/Documents/win7share/tctrls.txt

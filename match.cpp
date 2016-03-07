@@ -1,6 +1,6 @@
 #include "match.h"
 
-void nccMatch(const cv::Mat &tpl, const cv::Mat &src, cv::Point2d &pt1, cv::Point2d &pt2,
+void nccMatch(const Mat &tpl, const Mat &src, Point2d &pt1, Point2d &pt2,
                 double &maxCC, int& state,bool interpolation){
     //make sure that both the size of tmp and src are even
     assert(tpl.rows%2==0);
@@ -135,8 +135,7 @@ bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y){
         return 0;
 }
 
-
-bool checkSize(const cv::Mat& src,cv::Rect range){
+bool checkSize(const Mat& src,Rect range){
     bool con1=false,con2=false;
     if(range.x>=0 && range.y>=0)
         con1=true;
@@ -144,3 +143,118 @@ bool checkSize(const cv::Mat& src,cv::Rect range){
         con2=true;
     return con1 && con2;
 }
+
+void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vector<Match>& matches4Ctrls,
+                              vector<KeyPoint>& features,vector<Match>& matches /*output matches*/,
+                              int windowSize,int searchSize,int torOfEpipolar,double mccThresh){
+    //
+    matches.clear();
+    assert(windowSize%2==0);
+    assert(searchSize%2==0);
+//    assert(Xtor>=0);
+    int windowRadius=(windowSize/2);
+    int searchRadius=(searchSize/2);
+    //generate Triangulations for both images
+    vector<DMatch> terrainCtrls;
+    vector<KeyPoint> left_kpts,right_kpts;
+    Match2DMatch(matches4Ctrls,terrainCtrls,left_kpts,right_kpts);
+//    Delaunay tri_left;
+//    tri_left.generateDelaunay(Keypoints_left,cv::Rect(0,0,leftImage.cols,leftImage.rows));
+//    Delaunay tri_right;
+//    tri_right.generateDelaunay(Keypoints_right,cv::Rect(0,0,rightImage.cols,rightImage.rows));
+//    tri_right.setTriangulation(tri_left.getTriangleList());
+//    //traversing the triangulation
+//    std::vector<cv::Vec6f> triangulation=tri_left.getTriangleCoordinates();
+//    std::vector<cv::Vec6f> triangulation_right=tri_right.getTriangleCoordinates();
+//    std::vector<cv::Vec6f>::iterator iter1=triangulation.begin();
+//    std::vector<cv::Vec6f>::iterator iter2=triangulation_right.begin();
+//    for(;iter1<triangulation.end();++iter1,++iter2){
+
+//        //find features within the triangle
+//        cv::Vec6f t1=(*iter1);
+//        cv::Vec6f t2=(*iter2);
+//        cv::Point2f p1(t1[0],t1[1]);
+//        cv::Point2f p2(t1[2],t1[3]);
+//        cv::Point2f p3(t1[4],t1[5]);
+//        std::vector<cv::Point2f> contour;
+//        contour.push_back(p1);
+//        contour.push_back(p2);
+//        contour.push_back(p3);
+
+//        std::vector<cv::Point2f> ptsInside;
+//        for( int i = 0; i < features.size(); ++i ){
+//            int state= cv::pointPolygonTest(contour, features[i].pt, false);
+//            if(state==1){
+//                ptsInside.push_back(features[i].pt);
+//            }
+//        }
+
+//        //traversing all features within the triangle
+//        std::vector<cv::Point2f>::iterator iter=ptsInside.begin();
+//        for(;iter<ptsInside.end();++iter){
+//            //Calculate the possible disparity of this point
+//            double disparity=prediction(t1,t2,(*iter));
+//            cv::Point2f pt,left_pt,right_pt;
+//            pt=(*iter);
+//            left_pt=pt-cv::Point2f(windowRadius,windowRadius);
+//            //check if the range is beyond the range of the left image
+//            cv::Rect range(left_pt.x,left_pt.y,windowRadius*2,windowRadius*2);
+//            if(checkSize(leftImage,range)){
+//                //crop the left image patch
+//                cv::Mat tmp=leftImage(range);
+//                //higher left corner of the search patch
+//                right_pt=pt-cv::Point2f(disparity,0)-cv::Point2f(searchRadius,torOfEpipolar+windowRadius);
+//                //check if the range is beyond the range of the right image
+//                range=cv::Rect(right_pt.x,right_pt.y,searchRadius*2,(windowRadius+torOfEpipolar)*2);
+//                if((checkSize(rightImage,range))){
+//                    //crop the right image patch
+//                    cv::Mat src=rightImage(range);
+//                    //normalized correlation coefficient(NCC)
+//                    int state=0;
+//                    cv::Point2f pt1,pt2;
+//                    double mcc=nccMatch(tmp,src,pt1,pt2,state);
+
+//                    //state=1;
+
+//                    if(state){
+//                        //suppress correspondences with low correlation coefficient
+//                        if (mcc>=ccLimit){
+//                            Match match;
+//                            match.p1=pt;
+//                            match.p2=right_pt+pt2;
+//                            match.cc=mcc;
+//                            match.windowSize=windowSize;
+//                            if(((match.p1.x-match.p2.x)<(disparity+Xtor)) && ((match.p1.x-match.p2.x)>(disparity-Xtor))){
+//                                //disparity constraint
+//                                matches.push_back(match);
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+}
+
+
+void Match2DMatch(const vector<Match> &src, vector<DMatch> &dst, vector<KeyPoint> &leftkpts, vector<KeyPoint> &rightkpts)
+{
+    assert(src.size()>0);
+    dst.clear();
+    leftkpts.clear();
+    rightkpts.clear();
+    int count=0;
+    for(vector<Match>::const_iterator iter=src.begin();iter<src.end();++iter){
+        KeyPoint kpt;
+        kpt.pt=(*iter).p1;
+        leftkpts.push_back(kpt);
+        kpt.pt=(*iter).p2;
+        rightkpts.push_back(kpt);
+        DMatch match;
+        match.queryIdx=count;
+        match.trainIdx=count++;
+        dst.push_back(match);
+    }
+}
+
+

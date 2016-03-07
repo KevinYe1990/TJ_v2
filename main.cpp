@@ -1,6 +1,7 @@
 #include "common.h"
 #include "core.h"
 #include "match.h"
+#include "delaunay.h"
 
 #define _debug
 using namespace std;
@@ -19,9 +20,6 @@ void help(){
 }
 
 int main(int argc, char *argv[]){
-#ifdef _debug
-
-#endif
     //print help
     help();
 
@@ -43,11 +41,26 @@ int main(int argc, char *argv[]){
     readConfigFile(filename,"img2Path",img2Path);
     img2=imread(img2Path);
 
+#ifdef _debug
+    string terrainCtrlsPath;
+    readConfigFile(filename,"terrainCtrlsPath",terrainCtrlsPath);
+    vector<Match> matches;
+    readMatches(terrainCtrlsPath,matches);
+    Delaunay del;
+    vector<DMatch> dmatches;
+    vector<KeyPoint> leftkpts,rightkpts;
+    Match2DMatch(matches,dmatches,leftkpts,rightkpts);
+    del.generateDelaunay(leftkpts,Rect(0,0,img2.cols,img2.rows));
+    del.drawDelaunay(img2);
+    return 0;
+#endif
+
     while(--argc>0 && (*++argv)[0]=='-')
         while(c=*++argv[0])
             switch (c){
             case 'm':
             {//match
+
                 break;
             }
             case 'f':

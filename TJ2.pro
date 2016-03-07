@@ -36,13 +36,15 @@ LIBS += -L/usr/local/lib                        \
 HEADERS += \
     common.h \
     core.h \
-    match.h
+    match.h \
+    delaunay.h
 
 SOURCES += \
     main.cpp \
     common.cpp \
     core.cpp \
-    match.cpp
+    match.cpp \
+    delaunay.cpp
 
 QMAKE_CXXFLAGS += -fopenmp
 #QMAKE_MAC_SDK = macosx10.11

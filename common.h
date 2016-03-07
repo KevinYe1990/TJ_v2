@@ -19,7 +19,6 @@
 #include "opencv2/features2d/features2d.hpp"
 #include "opencv2/core/eigen.hpp"
 
-
 using namespace std;
 using namespace cv;
 using namespace Eigen;
@@ -28,10 +27,21 @@ extern Mat img1,img2;
 extern char *filename;
 extern string directory;
 
+struct Match{
+    cv::Point2f p1;
+    cv::Point2f p2;
+    int windowSize;
+    double corr;
+    double angle;
+    double speed;
+};
+
 bool exitwithErrors(const char *msg);
 void lowerString(string &str);
 void trimString(string &str);
 bool str2bool(string s);
+void KeyPoint2Point2f(const vector<KeyPoint>& src, vector<Point2f>& dst);
+void Point2f2KeyPoint(const vector<Point2f>& src, vector<KeyPoint>& dst);
 
 //void Matrix2Mat();
 
@@ -45,7 +55,8 @@ void showImage(Mat &img,string title="TEST",double scale=1);
 void showKeypoints(const Mat img,const vector<KeyPoint> &kpts,double scale=1);
 void printKeypoints(std::string filename,const std::vector<cv::KeyPoint>& kpts);
 
-
+void readMatches(const string filename,vector<Match>& matches,int withCC=false, int withWindowSize=false);
+void getPtsFromMatches(const vector<Match>& matches,vector<Point2f>& lpts,vector<Point2f>& rpts);
 //_DEBUG
 Mat genRandMat(int rows,int cols,int depth=CV_8UC1);
 

@@ -1,5 +1,17 @@
 #include "common.h"
 
+void KeyPoint2Point2f(const vector<KeyPoint>& src, vector<Point2f>& dst){
+    dst.clear();
+    for (size_t i=0; i<src.size(); ++i)
+        dst.push_back(src[i].pt);
+}
+
+void Point2f2KeyPoint(const vector<Point2f>& src, vector<KeyPoint>& dst){
+    dst.clear();
+    for (size_t i=0; i<src.size();++i)
+        dst.push_back(KeyPoint(src[i],1.0f));
+}
+
 bool exitwithErrors(const char *msg){
     cerr<<msg<<endl<<endl;
     return -1;
@@ -123,6 +135,52 @@ bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
     bool b=readConfigFile(cfgfilepath,key,strtmp);
     if(b) value=str2bool(strtmp);
     return b;
+}
+
+void readMatches(const string filename, vector<Match> &matches, int withCC, int withWindowSize)
+{
+    matches.clear();
+    ifstream in;
+    in.open(filename);
+    if(!in.is_open())
+        exitwithErrors("Unable to read the file!");
+    else{
+        while(!in.eof()){
+            Point2f pt1,pt2;
+            Match match;
+            if(withCC){
+                double cc;
+                in>>pt1.x>>pt1.y>>pt2.x>>pt2.y>>cc;
+                match.corr=cc;
+            }else
+                in>>pt1.x>>pt1.y>>pt2.x>>pt2.y;
+
+            match.p1=pt1;
+            match.p2=pt2;
+            if(withWindowSize){
+                int ww;
+                in>>ww;
+                match.windowSize=ww;
+            }
+            matches.push_back(match);
+        }
+    }
+    in.close();
+}
+
+
+void getPtsFromMatches(const vector<Match> &matches, vector<Point2f> &lpts, vector<Point2f> &rpts)
+{
+    assert(matches.size()>0);
+    lpts.clear();
+    rpts.clear();
+    for(vector<Match>::const_iterator citer=matches.begin();citer=matches.end();++citer){
+        Point2f lpt,rpt;
+        lpt=(*citer).p1;
+        lpts.push_back(lpt);
+        rpt=(*citer).p2;
+        rpts.push_back(rpt);
+    }
 }
 
 
