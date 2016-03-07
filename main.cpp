@@ -20,12 +20,7 @@ void help(){
 
 int main(int argc, char *argv[]){
 #ifdef _debug
-    Mat t=genRandMat(3,3,CV_32FC1);
-    cout<<"t:\n"<<t<<endl;
-    double x,y;
-    fit2ndPolynomial(t,x,y);
-    cout<<x<<","<<y<<endl;
-    return 0;
+
 #endif
     //print help
     help();
@@ -53,7 +48,7 @@ int main(int argc, char *argv[]){
             switch (c){
             case 'm':
             {//match
-//                Mat r=
+                break;
             }
             case 'f':
             {//feature types: 1)Good Feature; 2)Sift Feature; 3)Grid Feature;

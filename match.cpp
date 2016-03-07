@@ -1,72 +1,41 @@
 #include "match.h"
 
-//double nccMatch(const cv::Mat &tmp, const cv::Mat &src, cv::Point2f &pt1, cv::Point2f &pt2,
-//                int& state,bool interpolation){
-//    //make sure that both the size of tmp and src are even
-//    assert(tmp.rows%2==0);
-//    assert(tmp.cols%2==0);
-//    assert(src.rows%2==0);
-//    assert(src.cols%2==0);
-//    //create the result matrix
-//    int result_cols=src.cols-tmp.cols+1;
-//    int result_rows=src.rows-tmp.rows+1;
-//    cv::Mat ccMat(result_rows,result_cols,CV_32F);
-//    //Do the Matching and Normalize
-//    cv::matchTemplate(tmp,src,ccMat,cv::TM_CCOEFF_NORMED);
-//    //    normalize(ccMat,ccMat,0,1,NORM_MINMAX,-1,Mat());
-//    state=0;
-//    //Localizing the best match with minMaxLoc
-//    double minVal,maxVal;
-//    cv::Point minLoc,maxLoc;
-//    pt1.x=tmp.cols/2.0f;
-//    pt1.y=tmp.rows/2.0f;
-//    cv::minMaxLoc(ccMat,&minVal,&maxVal,&minLoc,&maxLoc,cv::Mat());
-//    //initial location, and it will be covered if interpolation is performed
-//    pt2.x=(float)maxLoc.x+tmp.cols/2.0f;
-//    pt2.y=(float)maxLoc.y+tmp.rows/2.0f;
-//    //refine the location by using interpolation
-//    if(interpolation){
-//        if(checkSize(ccMat,cv::Rect(maxLoc.x-1,maxLoc.y-1,3,3))){
-//            cv::Mat patch=ccMat(cv::Rect(maxLoc.x-1,maxLoc.y-1,3,3));
-//            double x_double,y_double;
-//            cv::Point2d p1,p2,p3;
-//            std::vector<cv::Point2d> input;
-//            //fit a 2nd polynomial curve along the x direction
-//            p1.x=0.5;p2.x=1.5;p3.x=2.5;
-//            p1.y=patch.at<float>(1,0);input.push_back(p1);
-//            p2.y=patch.at<float>(1,1);input.push_back(p2);
-//            p3.y=patch.at<float>(1,2);input.push_back(p3);
-//            x_double=fit2ndPolynomial(input);
-//            //fit a 2nd polynomial curve along the y direction
-//            input.clear();
-//            p1.y=patch.at<float>(0,1);input.push_back(p1);
-//            p2.y=patch.at<float>(1,1);input.push_back(p2);
-//            p3.y=patch.at<float>(2,1);input.push_back(p3);
-//            y_double=fit2ndPolynomial(input);
-//            if(fabs(x_double-1.5)<1 && fabs(y_double-1.5)<1){
-//                pt2.x=pt2.x+x_double-1.5f;
-//                pt2.y=pt2.y+y_double-1.5f;
-//                state=1;
-//            }
-//        }
-//    }
-//    return maxVal;
-//}
+void nccMatch(const cv::Mat &tpl, const cv::Mat &src, cv::Point2d &pt1, cv::Point2d &pt2,
+                double &maxCC, int& state,bool interpolation){
+    //make sure that both the size of tmp and src are even
+    assert(tpl.rows%2==0);
+    assert(tpl.cols%2==0);
+    assert(src.rows%2==0);
+    assert(src.cols%2==0);
+    //create the result matrix
+    int result_cols=src.cols-tpl.cols+1;
+    int result_rows=src.rows-tpl.rows+1;
+    Mat ccMat(result_rows,result_cols,CV_64FC1);
+    //Do the Matching and Normalize
+    matchTemplate(src,tpl,ccMat,TM_CCOEFF_NORMED);
+    //    normalize(ccMat,ccMat,0,1,NORM_MINMAX,-1,Mat());
+    //Localizing the best match with minMaxLoc
+    double minVal;
+    Point minLoc,maxLoc;
+    pt1.x=tpl.cols/2.0d;
+    pt1.y=tpl.rows/2.0d;
+    minMaxLoc(ccMat,&minVal,&maxCC,&minLoc,&maxLoc,Mat());
+    //initial location, and it will be covered if interpolation is performed
+    pt2.x=(double)maxLoc.x+tpl.cols/2.0d;
+    pt2.y=(double)maxLoc.y+tpl.rows/2.0d;
+    //refine the location by using interpolation
+    if(interpolation){
+        if(checkSize(ccMat,Rect(maxLoc.x-1,maxLoc.y-1,3,3))){
+            Mat patch=ccMat(Rect(maxLoc.x-1,maxLoc.y-1,3,3));
+            double x,y;
+            if(state=fit2ndPolynomial(patch,x,y)){
+                pt2.x+=x-1.5d;
+                pt2.y+=y-1.5d;
+            }
+        }
+    }
+}
 
-//double fit2ndPolynomial(const std::vector<cv::Point2d> pts){
-//    assert(pts.size()==3);
-//    cv::Point2d p1,p2,p3;
-//    p1=pts[0];p2=pts[1];p3=pts[2];
-//    double a,b,/*c,*/l1,l2,l3,l4;
-//    l1=(p1.x-p2.x)*(p1.x+p2.x)*(p2.y-p3.y);
-//    l2=(p1.x-p2.x)*(p1.x+p2.x)*(p2.x-p3.x);
-//    l3=(p2.x-p3.x)*(p2.x+p3.x)*(p1.y-p2.y);
-//    l4=(p2.x-p3.x)*(p2.x+p3.x)*(p1.x-p2.x);
-//    b=(l3-l1)/(l4-l2);
-//    a=((p1.y-p2.y)-b*(p1.x-p2.x))/(pow(p1.x,2)-pow(p2.x,2));
-//    //    c=p1.y-b*p1.x-a*pow(p1.x,2);
-//    return -b/(2.0f*a);
-//}
 
 //double prediction(cv::Vec6f t1,cv::Vec6f t2,cv::Point2f pt,int flag){
 //    double disparity=0;
@@ -124,7 +93,6 @@
 
 
 
-//bool fit2ndPoly(const Mat &cc, Point2d &pos){
 void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coeff,int order){
     MatrixXd A(xv.size(),order+1);
     VectorXd yv_mapped=VectorXd::Map(&yv.front(),yv.size());
@@ -146,8 +114,7 @@ void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coe
         coeff[i]=result[i];
 }
 
-void fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y)
-{
+bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y){
     MatrixXd cc_eigen;
     cv2eigen(cc_Mat,cc_eigen);
     vector<double> vv={0.5,1.5,2.5};
@@ -160,4 +127,20 @@ void fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y)
     polyfit(vv,yv,coeff2,2);
     x=-coeff1[1]/(2.0*coeff1[2]);
     y=-coeff2[1]/(2.0*coeff2[2]);
+
+    double thresh=1.0;
+    if((fabs(x-1.5)<=thresh) && (fabs(y-1.5)<=thresh))
+        return 1;
+    else
+        return 0;
+}
+
+
+bool checkSize(const cv::Mat& src,cv::Rect range){
+    bool con1=false,con2=false;
+    if(range.x>=0 && range.y>=0)
+        con1=true;
+    if((range.x+range.width)<=src.cols && (range.y+range.height)<=src.rows)
+        con2=true;
+    return con1 && con2;
 }

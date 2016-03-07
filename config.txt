@@ -1,8 +1,8 @@
 #**************************CONFIGURATION FOR TJ TO RUN************************
 #============================================================================#
 ###paths of image pair
-img1Path=/home/kevin/Documents/win7share/9058_l5_en.tif
-img2Path=/home/kevin/Documents/win7share/9059_l5_en.tif
+img1Path=/home/kevin/Documents/win7share/tpl.jpg
+img2Path=/home/kevin/Documents/win7share/src.jpg
      
 ###feature type:1)good feature; 2)fast feature; 3)grid feature
 #ImageID=left

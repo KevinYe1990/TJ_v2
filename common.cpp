@@ -127,8 +127,7 @@ bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
 
 
 //DEBUG
-Mat genRandMat(int rows, int cols, int depth)
-{
+Mat genRandMat(int rows, int cols, int depth){
     assert(rows>0);
     assert(cols>0);
     Mat dst(rows,cols,depth);
