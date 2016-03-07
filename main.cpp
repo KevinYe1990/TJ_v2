@@ -20,16 +20,11 @@ void help(){
 
 int main(int argc, char *argv[]){
 #ifdef _debug
-    vector<double> coeff;
-    vector<double> x_values={1,2,3,4};
-    vector<double> y_values={3,2,1,6};
-//    double x,y;
-//    while(scanf("%lf %lf\n",&x,&y)==2){
-//        x_values.push_back(x);
-//        y_values.push_back(y);
-//    }
-    polyfit(x_values,y_values,coeff,2);
-    printf("%f+%fx+%f*x^2\n",coeff[0],coeff[1],coeff[2]);
+    Mat t=genRandMat(3,3,CV_32FC1);
+    cout<<"t:\n"<<t<<endl;
+    double x,y;
+    fit2ndPolynomial(t,x,y);
+    cout<<x<<","<<y<<endl;
     return 0;
 #endif
     //print help

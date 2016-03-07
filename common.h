@@ -10,13 +10,15 @@
 #include <unistd.h>
 #include <time.h>
 
+//Eigen 3.2.8
+#include "Eigen/QR"
+#include "Eigen/Dense"
 //OpenCV 2.4.9
 #include "opencv2/opencv.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/features2d/features2d.hpp"
-//#include "opencv2/core/eigen.hpp"
-//Eigen 3.2.8
-#include "Eigen/QR"
+#include "opencv2/core/eigen.hpp"
+
 
 using namespace std;
 using namespace cv;
@@ -30,7 +32,7 @@ bool exitwithErrors(const char *msg);
 void lowerString(string &str);
 void trimString(string &str);
 bool str2bool(string s);
-//void Mat2Matrix(const Mat &src,Matrix &dst);
+
 //void Matrix2Mat();
 
 bool readConfigFile(const char *cfgfilepath, const string &key, string &value);
