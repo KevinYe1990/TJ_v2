@@ -1,9 +1,7 @@
 #include "common.h"
 #include "core.h"
-#include "match.h"
-#include "delaunay.h"
 
-#define _debug
+//#define _debug
 using namespace std;
 
 //global variables and functions
@@ -42,16 +40,7 @@ int main(int argc, char *argv[]){
     img2=imread(img2Path);
 
 #ifdef _debug
-    string terrainCtrlsPath;
-    readConfigFile(filename,"terrainCtrlsPath",terrainCtrlsPath);
-    vector<Match> matches;
-    readMatches(terrainCtrlsPath,matches);
-    Delaunay del;
-    vector<DMatch> dmatches;
-    vector<KeyPoint> leftkpts,rightkpts;
-    Match2DMatch(matches,dmatches,leftkpts,rightkpts);
-    del.generateDelaunay(leftkpts,Rect(0,0,img2.cols,img2.rows));
-    del.drawDelaunay(img2);
+
     return 0;
 #endif
 
@@ -60,7 +49,12 @@ int main(int argc, char *argv[]){
             switch (c){
             case 'm':
             {//match
-
+                char *type=*++argv;
+                --argc;
+                if(strlen(type)==1)
+                    performMatching(type);
+                else
+                    exitwithErrors("unknown type for feature extraction!");
                 break;
             }
             case 'f':

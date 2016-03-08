@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 3.3.1, 2016-03-07T22:40:27. -->
+<!-- Written by QtCreator 3.3.1, 2016-03-08T16:54:15. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -239,7 +239,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">TJ2</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">TJ22</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:/home/kevin/Desktop/TJ_v2/TJ2.pro</value>
-    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">/home/kevin/Desktop/TJ_v2/config.txt -m</value>
+    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">/home/kevin/Desktop/TJ_v2/config.txt -m a -p</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">TJ2.pro</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix">false</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseTerminal">true</value>

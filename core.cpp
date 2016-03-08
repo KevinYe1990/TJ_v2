@@ -114,3 +114,14 @@ bool extractFeatures(char *type){
         printKeypoints(outPath,keypoints);
     }
 }
+
+void performMatching(char *type)
+{
+    string terrainCtrlsPath;
+    readConfigFile(filename,"terrainCtrlsPath",terrainCtrlsPath);
+    vector<Match> terrainCtrls;
+    readMatches(terrainCtrlsPath,terrainCtrls);
+    Delaunay del(img2);
+    del.generateDelaunay(terrainCtrls);
+    del.drawDelaunay(img2);
+}
