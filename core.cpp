@@ -121,7 +121,9 @@ void performMatching(char *type)
     readConfigFile(filename,"terrainCtrlsPath",terrainCtrlsPath);
     vector<Match> terrainCtrls;
     readMatches(terrainCtrlsPath,terrainCtrls);
+    vector<Point2f> l,r;
+    getPtsFromMatches(terrainCtrls,l,r);
     Delaunay del(img2);
-    del.generateDelaunay(terrainCtrls);
+    del.generateDelaunay(l);
     del.drawDelaunay(img2);
 }
