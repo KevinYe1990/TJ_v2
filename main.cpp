@@ -41,7 +41,6 @@ int main(int argc, char *argv[]){
 
 #ifdef _debug
 
-    return 0;
 #endif
 
     while(--argc>0 && (*++argv)[0]=='-')

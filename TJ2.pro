@@ -12,7 +12,6 @@ TEMPLATE = app
 INCLUDEPATH +=/usr/local/include              \
               /usr/local/include/opencv       \
               /usr/local/include/opencv2      \
-              /usr/local/include/eigen3        \
 
 LIBS += -L/usr/local/lib                        \
         -lopencv_features2d                     \
@@ -57,7 +56,7 @@ SOURCES += \
 >>>>>>> origin/master
 
 QMAKE_CXXFLAGS += -fopenmp
-#QMAKE_MAC_SDK = macosx10.11
+QMAKE_MAC_SDK = macosx10.11
 
 #LIBS += -fopenmp
 

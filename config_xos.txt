@@ -1,13 +1,13 @@
 #**************************CONFIGURATION FOR TJ TO RUN************************
 #============================================================================#
 ###paths of image pair
-img1Path=/home/kevin/Documents/win7share/left.jpg
-img2Path=/home/kevin/Documents/win7share/right.jpg
+img1Path=/Users/Kevin/Desktop/TJ_v2/tpl.jpg
+img2Path=/Users/Kevin/Desktop/TJ_v2/src.jpg
      
 ###feature type:1)good feature; 2)fast feature; 3)grid feature
 #ImageID=left
 DisplayKeypoints=true
-DisplayScale=.5
+DisplayScale=.2
 SaveKeypoints=true
 #SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
 #*********parameters of the good feature algorithm*********

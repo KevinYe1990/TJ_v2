@@ -7,15 +7,10 @@ class Delaunay:Subdiv2D{
 
     typedef struct {
         int id;//triangle index
-        int pts_id[3];
+        Point2f vertices[3];
+        double attribute[3];
         double area;
     } triangle;
-
-    typedef struct {
-        int id;
-        Match mpt[3];
-        double area;
-    } dualTri;
 
 public:
     Delaunay(Rect rect):Subdiv2D(rect){}
@@ -24,19 +19,18 @@ public:
 
     void generateDelaunay(const vector<Point2f>& pts);
     void generateDelaunay(const vector<KeyPoint>& kpts);
-    void generateDelaunay(const vector<Match>& matches);
-    void genTriangleList();
+//    void generateDelaunay(const vector<Match>& matches);
+//    void generateDelaunay(const vector<Point2f>& pts, const vector<double> attribute);
+//    void getTriangulation();
+    void getTriangulation(const vector<double>& attribute);
     void drawDelaunay(const Mat& src,Scalar delaunayColor=Scalar(0,0,255));
 
-//    void getDTriList(vector<dualTri>& list);
-    int getNumOfTRI();
     //点在网内
     //根据三角网预测位置
 private:
-//    vector<Point2f> vertices;
-    vector<triangle> triList;
-    vector<dualTri> dualList;
-//    int numOfTRI;
+    vector<triangle> triangulation;
+    double calTriArea(const Point2f pt1,const Point2f pt2,const Point2f pt3);
+
 };
 
 #endif // DELAUNAY
