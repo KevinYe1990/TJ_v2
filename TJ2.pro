@@ -33,12 +33,12 @@ LIBS += -L/usr/local/lib                        \
         -lopencv_nonfree                        \
 
 HEADERS += \
-    master.h \
+    core.h \
     common.h
 
 SOURCES += \
     main.cpp \
-    master.cpp \
+    core.cpp \
     common.cpp
 
 QMAKE_CXXFLAGS += -fopenmp
