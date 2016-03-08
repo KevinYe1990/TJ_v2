@@ -38,16 +38,6 @@ struct Match{
     double speed;
 };
 
-typedef struct {
-    int id;//triangle index
-    int pts_id[3];
-} triangle;
-
-typedef struct {
-    int id;
-    Match mpt[3];
-} dualTri;
-
 bool exitwithErrors(const char *msg);
 void lowerString(string &str);
 void trimString(string &str);
@@ -70,6 +60,10 @@ void printKeypoints(std::string filename,const std::vector<cv::KeyPoint>& kpts);
 void readKeyPoints(const string filename,vector<cv::KeyPoint>& kpts);
 void readMatches(const string filename,vector<Match>& matches,int withCC=false, int withWindowSize=false);
 void getPtsFromMatches(const vector<Match>& matches,vector<Point2f>& lpts,vector<Point2f>& rpts);
+void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoint>& left);
+bool camp(const cv::KeyPoint& rhs, const cv::KeyPoint& lhs);
+
+
 //_DEBUG
 Mat genRandMat(int rows,int cols,int depth=CV_8UC1);
 
