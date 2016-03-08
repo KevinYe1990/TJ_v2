@@ -1,6 +1,7 @@
 #include "common.h"
-#include "master.h"
+#include "core.h"
 
+//#define _debug
 using namespace std;
 
 //global variables and functions
@@ -38,12 +39,23 @@ int main(int argc, char *argv[]){
     readConfigFile(filename,"img2Path",img2Path);
     img2=imread(img2Path);
 
+#ifdef _debug
+
+    return 0;
+#endif
+
     while(--argc>0 && (*++argv)[0]=='-')
         while(c=*++argv[0])
             switch (c){
             case 'm':
             {//match
-//                Mat r=
+                char *type=*++argv;
+                --argc;
+                if(strlen(type)==1)
+                    performMatching(type);
+                else
+                    exitwithErrors("unknown type for feature extraction!");
+                break;
             }
             case 'f':
             {//feature types: 1)Good Feature; 2)Sift Feature; 3)Grid Feature;
@@ -66,8 +78,6 @@ int main(int argc, char *argv[]){
 
     return 0;
 }
-
-
 
 static bool printConfigFile(){
     cout<<"Configuration File Content:"<<endl;

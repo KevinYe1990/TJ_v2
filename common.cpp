@@ -1,5 +1,31 @@
 #include "common.h"
 
+bool camp(const KeyPoint& rhs, const KeyPoint& lhs){
+    if (rhs.pt.x < lhs.pt.x){
+        return true;
+    }
+    else if (rhs.pt.x > lhs.pt.x)
+        return false;
+    else{
+        if (rhs.pt.y < lhs.pt.y)
+            return true;
+        else
+            return false;
+    }
+}
+
+void KeyPoint2Point2f(const vector<KeyPoint>& src, vector<Point2f>& dst){
+    dst.clear();
+    for (size_t i=0; i<src.size(); ++i)
+        dst.push_back(src[i].pt);
+}
+
+void Point2f2KeyPoint(const vector<Point2f>& src, vector<KeyPoint>& dst){
+    dst.clear();
+    for (size_t i=0; i<src.size();++i)
+        dst.push_back(KeyPoint(src[i],1.0f));
+}
+
 bool exitwithErrors(const char *msg){
     cerr<<msg<<endl<<endl;
     return -1;
@@ -62,21 +88,6 @@ void printKeypoints(std::string filename,const std::vector<cv::KeyPoint>& kpts){
     cout<<kpts.size()<<" Keypoints were written into the file "<<filename<<endl<<endl;
 }
 
-/*int getTypeindex(const string t){
-    string tstr=t;
-    transform(tstr.begin(),tstr.end(),tstr.begin(),::tolower);
-    if(tstr=="int")
-        return 1;
-    else if(tstr=="double")
-        return 2;
-    else if(tstr=="string")
-        return 3;
-    else if(tstr=="bool")
-        return 4;
-    else
-        exitwithErrors("Cannot identify the unknown data type!");
-}*/
-
 bool readConfigFile(const char *cfgfilepath, const string &key, string &value){
     /*
      * parameter:
@@ -127,14 +138,12 @@ bool readConfigFile(const char *cfgfilepath, const string &key, double &value){
     if(b) value=atof(strtmp.c_str());
     return b;
 }
-
 bool readConfigFile(const char *cfgfilepath, const string &key, float &value){
     double tmp=value;
     bool b=readConfigFile(cfgfilepath,key,tmp);
     if(b) value=(float)tmp;
     return b;
 }
-
 bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
     string strtmp;
     bool b=readConfigFile(cfgfilepath,key,strtmp);
@@ -142,4 +151,120 @@ bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
     return b;
 }
 
+void readMatches(const string filename, vector<Match> &matches, int withCC, int withWindowSize)
+{
+    matches.clear();
+    ifstream in;
+    in.open(filename);
+    if(!in.is_open())
+        exitwithErrors("Unable to read the file!");
+    else{
+        while(!in.eof()){
+            Point2f pt1,pt2;
+            Match match;
+            if(withCC){
+                double cc;
+                in>>pt1.x>>pt1.y>>pt2.x>>pt2.y>>cc;
+                match.corr=cc;
+            }else
+                in>>pt1.x>>pt1.y>>pt2.x>>pt2.y;
 
+            match.p1=pt1;
+            match.p2=pt2;
+            if(withWindowSize){
+                int ww;
+                in>>ww;
+                match.windowSize=ww;
+            }
+            matches.push_back(match);
+        }
+    }
+    in.close();
+}
+
+
+void getPtsFromMatches(const vector<Match> &matches, vector<Point2f> &lpts, vector<Point2f> &rpts)
+{
+    assert(matches.size()>0);
+    lpts.clear();
+    rpts.clear();
+    for(vector<Match>::const_iterator citer=matches.begin();citer<matches.end();++citer){
+        Point2f lpt,rpt;
+        lpt=(*citer).p1;
+        lpts.push_back(lpt);
+        rpt=(*citer).p2;
+        rpts.push_back(rpt);
+    }
+}
+
+void readKeyPoints(const string filename, vector<cv::KeyPoint>& kpts){
+    ifstream in;
+    in.open(filename);
+    int numOfPoints=0;
+
+    if(!in.is_open())
+        exitwithErrors("Unable to open the keypoint file!");
+
+    kpts.clear();
+    while(!in.eof()){
+        cv::KeyPoint kpt;
+        in>>kpt.pt.x>>kpt.pt.y;
+        kpts.push_back(kpt);
+        numOfPoints++;
+    }
+    in.close();
+    printf("Input %d keypoints in all.\n",numOfPoints);
+}
+
+void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoint>& left){
+    int n = keypts.size();
+    int m = matches.size();
+    vector<Point2f> lpts,rpts;
+    vector<KeyPoint> r_pts;
+    left.clear();
+    rpts.clear();
+    r_pts.clear();
+    getPtsFromMatches(matches,rpts,lpts);
+
+    KeyPoint::convert(rpts, r_pts);
+
+    std::sort(keypts.begin(), keypts.end(),camp);
+    std::sort(r_pts.begin(), r_pts.end(), camp);
+    std::set_difference(
+        keypts.begin(), keypts.end(),
+        r_pts.begin(), r_pts.end(),
+        std::back_inserter(left), camp
+        );
+
+    std::printf("The total KeyPoint number is: %d.\n"
+                "The number of the Matched ones is: %d.\n"
+                "The number of left is: %d\n",
+        n, m, left.size());
+}
+
+//DEBUG
+Mat genRandMat(int rows, int cols, int depth){
+    assert(rows>0);
+    assert(cols>0);
+    Mat dst(rows,cols,depth);
+    srand((unsigned)time(NULL));
+    for(int i=0;i<rows;++i)
+        for(int j=0;j<cols;++j){
+            double r=rand()%256;
+            switch(depth){
+                case CV_32FC1:{
+                    dst.at<float>(i,j)=(float)(r/256.0);
+                    break;
+                }
+                case CV_64FC1:{
+                    dst.at<double>(i,j)=r/256.0;
+                    break;
+                }
+                default:{
+                    dst.at<uchar>(i,j)=(int)r;
+                    break;
+                }
+            }
+        }
+    return dst;
+}

@@ -1,4 +1,4 @@
-#include "master.h"
+#include "core.h"
 #include "common.h"
 
 bool extractFeatures(char *type){
@@ -113,4 +113,15 @@ bool extractFeatures(char *type){
     if(saveKpts){
         printKeypoints(outPath,keypoints);
     }
+}
+
+void performMatching(char *type)
+{
+    string terrainCtrlsPath;
+    readConfigFile(filename,"terrainCtrlsPath",terrainCtrlsPath);
+    vector<Match> terrainCtrls;
+    readMatches(terrainCtrlsPath,terrainCtrls);
+    Delaunay del(img2);
+    del.generateDelaunay(terrainCtrls);
+    del.drawDelaunay(img2);
 }
