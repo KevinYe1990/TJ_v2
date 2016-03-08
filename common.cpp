@@ -1,5 +1,19 @@
 #include "common.h"
 
+bool camp(const KeyPoint& rhs, const KeyPoint& lhs){
+    if (rhs.pt.x < lhs.pt.x){
+        return true;
+    }
+    else if (rhs.pt.x > lhs.pt.x)
+        return false;
+    else{
+        if (rhs.pt.y < lhs.pt.y)
+            return true;
+        else
+            return false;
+    }
+}
+
 void KeyPoint2Point2f(const vector<KeyPoint>& src, vector<Point2f>& dst){
     dst.clear();
     for (size_t i=0; i<src.size(); ++i)
@@ -200,6 +214,32 @@ void readKeyPoints(const string filename, vector<cv::KeyPoint>& kpts){
     }
     in.close();
     printf("Input %d keypoints in all.\n",numOfPoints);
+}
+
+void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoint>& left){
+    int n = keypts.size();
+    int m = matches.size();
+    vector<Point2f> lpts,rpts;
+    vector<KeyPoint> r_pts;
+    left.clear();
+    rpts.clear();
+    r_pts.clear();
+    getPtsFromMatches(matches,rpts,lpts);
+
+    KeyPoint::convert(rpts, r_pts);
+
+    std::sort(keypts.begin(), keypts.end(),camp);
+    std::sort(r_pts.begin(), r_pts.end(), camp);
+    std::set_difference(
+        keypts.begin(), keypts.end(),
+        r_pts.begin(), r_pts.end(),
+        std::back_inserter(left), camp
+        );
+
+    std::printf("The total KeyPoint number is: %d.\n"
+                "The number of the Matched ones is: %d.\n"
+                "The number of left is: %d\n",
+        n, m, left.size());
 }
 
 //DEBUG

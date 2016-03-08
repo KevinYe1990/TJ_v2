@@ -99,11 +99,18 @@ void Delaunay::generateDelaunay(const vector<Match> &matches)
         memcpy(dtri.mpt,tmatches,3*sizeof(Match));
 
         dualList.push_back(dtri);
+
+        contourArea()
     }
 }
 
-void Delaunay::getDTriList(vector<dualTri> &list)
+//void Delaunay::getDTriList(vector<dualTri> &list)
+//{
+//    list.clear();
+//    list.insert(list.end(),dualList.begin(),dualList.end());
+//}
+
+int Delaunay::getNumOfTRI()
 {
-    list.clear();
-    list.insert(list.end(),dualList.begin(),dualList.end());
+    return triList.size();
 }
