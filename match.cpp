@@ -155,15 +155,13 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
     int windowRadius=(windowSize/2);
     int searchRadius=(searchSize/2);
     //generate Triangulations for both images
-    vector<DMatch> terrainCtrls;
+//    vector<DMatch> terrainCtrls;
     vector<KeyPoint> left_kpts,right_kpts;
-    Match2DMatch(matches4Ctrls,terrainCtrls,left_kpts,right_kpts);
-//    Delaunay tri_left;
-//    tri_left.generateDelaunay(Keypoints_left,cv::Rect(0,0,leftImage.cols,leftImage.rows));
-//    Delaunay tri_right;
-//    tri_right.generateDelaunay(Keypoints_right,cv::Rect(0,0,rightImage.cols,rightImage.rows));
-//    tri_right.setTriangulation(tri_left.getTriangleList());
-//    //traversing the triangulation
+//    Match2DMatch(matches4Ctrls,terrainCtrls,left_kpts,right_kpts);
+    Delaunay tri(leftImg);
+    tri.generateDelaunay(matches4Ctrls);
+
+    //traversing the triangulation
 //    std::vector<cv::Vec6f> triangulation=tri_left.getTriangleCoordinates();
 //    std::vector<cv::Vec6f> triangulation_right=tri_right.getTriangleCoordinates();
 //    std::vector<cv::Vec6f>::iterator iter1=triangulation.begin();

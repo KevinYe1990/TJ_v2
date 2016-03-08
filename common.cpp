@@ -174,7 +174,7 @@ void getPtsFromMatches(const vector<Match> &matches, vector<Point2f> &lpts, vect
     assert(matches.size()>0);
     lpts.clear();
     rpts.clear();
-    for(vector<Match>::const_iterator citer=matches.begin();citer=matches.end();++citer){
+    for(vector<Match>::const_iterator citer=matches.begin();citer<matches.end();++citer){
         Point2f lpt,rpt;
         lpt=(*citer).p1;
         lpts.push_back(lpt);
@@ -183,6 +183,24 @@ void getPtsFromMatches(const vector<Match> &matches, vector<Point2f> &lpts, vect
     }
 }
 
+void readKeyPoints(const string filename, vector<cv::KeyPoint>& kpts){
+    ifstream in;
+    in.open(filename);
+    int numOfPoints=0;
+
+    if(!in.is_open())
+        exitwithErrors("Unable to open the keypoint file!");
+
+    kpts.clear();
+    while(!in.eof()){
+        cv::KeyPoint kpt;
+        in>>kpt.pt.x>>kpt.pt.y;
+        kpts.push_back(kpt);
+        numOfPoints++;
+    }
+    in.close();
+    printf("Input %d keypoints in all.\n",numOfPoints);
+}
 
 //DEBUG
 Mat genRandMat(int rows, int cols, int depth){

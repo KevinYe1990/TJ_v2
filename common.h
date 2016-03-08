@@ -28,6 +28,8 @@ extern char *filename;
 extern string directory;
 
 struct Match{
+    Match(){}
+    Match(Point2f p1,Point2f p2):p1(p1),p2(p2),windowSize(0),corr(0),angle(0),speed(0){}
     cv::Point2f p1;
     cv::Point2f p2;
     int windowSize;
@@ -35,6 +37,16 @@ struct Match{
     double angle;
     double speed;
 };
+
+typedef struct {
+    int id;//triangle index
+    int pts_id[3];
+} triangle;
+
+typedef struct {
+    int id;
+    Match mpt[3];
+} dualTri;
 
 bool exitwithErrors(const char *msg);
 void lowerString(string &str);
@@ -55,6 +67,7 @@ void showImage(Mat &img,string title="TEST",double scale=1);
 void showKeypoints(const Mat img,const vector<KeyPoint> &kpts,double scale=1);
 void printKeypoints(std::string filename,const std::vector<cv::KeyPoint>& kpts);
 
+void readKeyPoints(const string filename,vector<cv::KeyPoint>& kpts);
 void readMatches(const string filename,vector<Match>& matches,int withCC=false, int withWindowSize=false);
 void getPtsFromMatches(const vector<Match>& matches,vector<Point2f>& lpts,vector<Point2f>& rpts);
 //_DEBUG

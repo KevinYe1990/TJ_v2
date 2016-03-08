@@ -2,6 +2,7 @@
 #define MATCH
 
 #include "common.h"
+#include "delaunay.h"
 
 //old.match
 
