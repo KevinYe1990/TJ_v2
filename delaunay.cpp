@@ -30,6 +30,36 @@ void Delaunay::drawDelaunay(const Mat& src,Scalar delaunayColor){
     showImage(dst,"Delaunay",imagescale);
 }
 
+
+bool Delaunay::iswithinTri(const Point2f &pt, int tri_id)
+{
+    triangle tri=triangulation[tri_id];
+    vector<Point2f> contour;
+    convert2Contour(tri,contour);
+    return pointPolygonTest(contour,pt,false);
+}
+
+
+double Delaunay::interpolateAttr(const Point2f &pt, int tri_id){
+    MatrixXd A(3,3);
+    Vector3d yv_mapped(-1,-1,-1);
+    VectorXd result;
+    triangle tri=triangulation[tri_id];
+
+    //create matrix
+    for (size_t i=0;i<3;++i){
+        A(i,0)=tri.vtx[i].pt.x;
+        A(i,1)=tri.vtx[i].pt.y;
+        A(i,2)=tri.vtx[i].attr;
+    }
+
+    //solve for linear least squares fit
+    result=A.householderQr().solve(yv_mapped);
+
+    return (-1.0-result[0]*pt.x-result[1]*pt.y)/result[2];
+}
+
+
 double Delaunay::calTriArea(const Point2f pt1, const Point2f pt2, const Point2f pt3)
 {
 //    vector< vector<Point2f>> contour;
@@ -41,6 +71,7 @@ double Delaunay::calTriArea(const Point2f pt1, const Point2f pt2, const Point2f 
     return contourArea(contour);
 }
 
+
 double Delaunay::calTriArea(const Delaunay::vertex *v)
 {
     Point2f p1,p2,p3;
@@ -50,12 +81,22 @@ double Delaunay::calTriArea(const Delaunay::vertex *v)
     return calTriArea(p1,p2,p3);
 }
 
-void Delaunay::generateDelaunay(const vector<Point2f> &pts,const vector<double>& attribute)
+
+void Delaunay::convert2Contour(const Delaunay::triangle &tri, vector<Point2f> &contour)
 {
+    contour.clear();
+    contour.push_back(tri.vtx[0].pt);
+    contour.push_back(tri.vtx[1].pt);
+    contour.push_back(tri.vtx[2].pt);
+}
+
+
+void Delaunay::generateDelaunay(const vector<Point2f> &pts,const vector<double>& attribute){
     this->insert(pts);
     getTriangulation(attribute);
     std::sort(triangulation.begin(),triangulation.end(),compTri);//descend
 }
+
 
 void Delaunay::generateDelaunay(const vector<KeyPoint> &kpts,const vector<double>& attribute){
     vector<Point2f> pts;
@@ -63,8 +104,8 @@ void Delaunay::generateDelaunay(const vector<KeyPoint> &kpts,const vector<double
     generateDelaunay(pts,attribute);
 }
 
-void Delaunay::generateDelaunay(const vector<Match> &matches)
-{
+
+void Delaunay::generateDelaunay(const vector<Match> &matches){
     vector<double> attribute;
     for(int i=0;i<matches.size();++i){
         double attri=matches[i].p1.x-matches[i].p2.x;
@@ -127,31 +168,4 @@ void Delaunay::getTriangulation(const vector<double> &attribute){
                 triangulation.push_back(tri);
             }
 }
-
-
-//void Delaunay::generateDelaunay(const vector<Match> &matches){
-//    vector<Point2f> left_pts,right_pts;
-//    getPtsFromMatches(matches,left_pts,right_pts);
-//    generateDelaunay(left_pts);
-
-//    dualList.clear();
-
-//    for(int i=0;i<triList.size();++i){
-//        dualTri dtri;
-//        dtri.id=i;
-//        Match tmatches[3];
-//        int idx=triList[i].pts_id[0];
-//        tmatches[0]=Match(vtx[idx].pt,right_pts[idx-4]);//the first 4 vertices are the 4 corners
-//        idx=triList[i].pts_id[1];
-//        tmatches[1]=Match(vtx[idx].pt,right_pts[idx-4]);
-//        idx=triList[i].pts_id[2];
-//        tmatches[2]=Match(vtx[idx].pt,right_pts[idx-4]);
-
-
-//    }
-//}
-
-//void Delaunay::generateDelaunay(const vector<Point2f> &pts, const vector<double> attribute){
-
-//}
 

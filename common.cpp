@@ -241,6 +241,49 @@ void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoin
         n, m, left.size());
 }
 
+void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coeff,int order){
+    MatrixXd A(xv.size(),order+1);
+    VectorXd yv_mapped=VectorXd::Map(&yv.front(),yv.size());
+    VectorXd result;
+
+    assert(xv.size()==yv.size());
+    assert(xv.size()>=order+1);
+
+    //create matrix
+    for (size_t i=0;i<xv.size();++i)
+        for(size_t j=0;j<order+1;++j)
+            A(i,j)=pow(xv.at(i),j);
+
+    //solve for linear least squares fit
+    result=A.householderQr().solve(yv_mapped);
+
+    coeff.resize(order+1);
+    for (size_t i=0;i<order+1;++i)
+        coeff[i]=result[i];
+}
+
+bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y){
+    MatrixXd cc_eigen;
+    cv2eigen(cc_Mat,cc_eigen);
+    vector<double> vv={0.5,1.5,2.5};
+    VectorXd v3d=cc_eigen.col(1);
+    RowVectorXd r3d=cc_eigen.row(1);
+    vector<double> xv(r3d.data(),r3d.data()+3);
+    vector<double> yv(v3d.data(),v3d.data()+3);
+    vector<double> coeff1,coeff2;
+    polyfit(vv,xv,coeff1,2);
+    polyfit(vv,yv,coeff2,2);
+    x=-coeff1[1]/(2.0*coeff1[2]);
+    y=-coeff2[1]/(2.0*coeff2[2]);
+
+    double thresh=1.0;
+    if((fabs(x-1.5)<=thresh) && (fabs(y-1.5)<=thresh))
+        return 1;
+    else
+        return 0;
+}
+
+
 //DEBUG
 Mat genRandMat(int rows, int cols, int depth){
     assert(rows>0);

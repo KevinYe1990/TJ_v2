@@ -124,4 +124,9 @@ void performMatching(char *type)
     Delaunay del(img1);
     del.generateDelaunay(terrainCtrls);
     del.drawDelaunay(img1);
+    vector<Match> matches;
+    vector<KeyPoint> kpts;
+    KeyPoint pt(255,366,1);
+    kpts.push_back(pt);
+    matchUnderTerrainControl(img1,img2,terrainCtrls,kpts,matches);
 }

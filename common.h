@@ -66,6 +66,8 @@ void getPtsFromMatches(const vector<Match>& matches,vector<Point2f>& lpts,vector
 void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoint>& left);
 bool compKeyPoints(const cv::KeyPoint& rhs, const cv::KeyPoint& lhs);
 
+void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coeff,int order=2);
+bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y);
 
 //_DEBUG
 Mat genRandMat(int rows,int cols,int depth=CV_8UC1);

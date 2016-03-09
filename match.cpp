@@ -93,47 +93,6 @@ void nccMatch(const Mat &tpl, const Mat &src, Point2d &pt1, Point2d &pt2,
 
 
 
-void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coeff,int order){
-    MatrixXd A(xv.size(),order+1);
-    VectorXd yv_mapped=VectorXd::Map(&yv.front(),yv.size());
-    VectorXd result;
-
-    assert(xv.size()==yv.size());
-    assert(xv.size()>=order+1);
-
-    //create matrix
-    for (size_t i=0;i<xv.size();++i)
-        for(size_t j=0;j<order+1;++j)
-            A(i,j)=pow(xv.at(i),j);
-
-    //solve for linear least squares fit
-    result=A.householderQr().solve(yv_mapped);
-
-    coeff.resize(order+1);
-    for (size_t i=0;i<order+1;++i)
-        coeff[i]=result[i];
-}
-
-bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y){
-    MatrixXd cc_eigen;
-    cv2eigen(cc_Mat,cc_eigen);
-    vector<double> vv={0.5,1.5,2.5};
-    VectorXd v3d=cc_eigen.col(1);
-    RowVectorXd r3d=cc_eigen.row(1);
-    vector<double> xv(r3d.data(),r3d.data()+3);
-    vector<double> yv(v3d.data(),v3d.data()+3);
-    vector<double> coeff1,coeff2;
-    polyfit(vv,xv,coeff1,2);
-    polyfit(vv,yv,coeff2,2);
-    x=-coeff1[1]/(2.0*coeff1[2]);
-    y=-coeff2[1]/(2.0*coeff2[2]);
-
-    double thresh=1.0;
-    if((fabs(x-1.5)<=thresh) && (fabs(y-1.5)<=thresh))
-        return 1;
-    else
-        return 0;
-}
 
 bool checkSize(const Mat& src,Rect range){
     bool con1=false,con2=false;
@@ -162,76 +121,60 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
     tri.generateDelaunay(matches4Ctrls);
 
     //traversing the triangulation
-//    int n=tri.getNumOfTRI();
-//    for(int i=0;i<n;++i){
+    int n=tri.getNumberOfTri();
+    vector<bool> featureMask(features.size(),true);
+    for(int i=0;i<n;++i){
         //find features within the triangle
+        for(int j=0;j<features.size();++j){
+            //traversing the features
+            if(featureMask[j]){
+                if(tri.iswithinTri(features[j].pt,i)){
+                    //feature inside the triangle
+                    featureMask[j]=false;
+                    double preParaX=tri.interpolateAttr(features[i].pt,i);
+                    {//            cv::Point2f pt,left_pt,right_pt;
+                    //            pt=(*iter);
+                    //            left_pt=pt-cv::Point2f(windowRadius,windowRadius);
+                    //            //check if the range is beyond the range of the left image
+                    //            cv::Rect range(left_pt.x,left_pt.y,windowRadius*2,windowRadius*2);
+                    //            if(checkSize(leftImage,range)){
+                    //                //crop the left image patch
+                    //                cv::Mat tmp=leftImage(range);
+                    //                //higher left corner of the search patch
+                    //                right_pt=pt-cv::Point2f(disparity,0)-cv::Point2f(searchRadius,torOfEpipolar+windowRadius);
+                    //                //check if the range is beyond the range of the right image
+                    //                range=cv::Rect(right_pt.x,right_pt.y,searchRadius*2,(windowRadius+torOfEpipolar)*2);
+                    //                if((checkSize(rightImage,range))){
+                    //                    //crop the right image patch
+                    //                    cv::Mat src=rightImage(range);
+                    //                    //normalized correlation coefficient(NCC)
+                    //                    int state=0;
+                    //                    cv::Point2f pt1,pt2;
+                    //                    double mcc=nccMatch(tmp,src,pt1,pt2,state);
 
-//    }
+                    //                    //state=1;
 
-//
-//        cv::Vec6f t1=(*iter1);
-//        cv::Vec6f t2=(*iter2);
-//        cv::Point2f p1(t1[0],t1[1]);
-//        cv::Point2f p2(t1[2],t1[3]);
-//        cv::Point2f p3(t1[4],t1[5]);
-//        std::vector<cv::Point2f> contour;
-//        contour.push_back(p1);
-//        contour.push_back(p2);
-//        contour.push_back(p3);
-
-//        std::vector<cv::Point2f> ptsInside;
-//        for( int i = 0; i < features.size(); ++i ){
-//            int state= cv::pointPolygonTest(contour, features[i].pt, false);
-//            if(state==1){
-//                ptsInside.push_back(features[i].pt);
-//            }
-//        }
-
-//        //traversing all features within the triangle
-//        std::vector<cv::Point2f>::iterator iter=ptsInside.begin();
-//        for(;iter<ptsInside.end();++iter){
-//            //Calculate the possible disparity of this point
-//            double disparity=prediction(t1,t2,(*iter));
-//            cv::Point2f pt,left_pt,right_pt;
-//            pt=(*iter);
-//            left_pt=pt-cv::Point2f(windowRadius,windowRadius);
-//            //check if the range is beyond the range of the left image
-//            cv::Rect range(left_pt.x,left_pt.y,windowRadius*2,windowRadius*2);
-//            if(checkSize(leftImage,range)){
-//                //crop the left image patch
-//                cv::Mat tmp=leftImage(range);
-//                //higher left corner of the search patch
-//                right_pt=pt-cv::Point2f(disparity,0)-cv::Point2f(searchRadius,torOfEpipolar+windowRadius);
-//                //check if the range is beyond the range of the right image
-//                range=cv::Rect(right_pt.x,right_pt.y,searchRadius*2,(windowRadius+torOfEpipolar)*2);
-//                if((checkSize(rightImage,range))){
-//                    //crop the right image patch
-//                    cv::Mat src=rightImage(range);
-//                    //normalized correlation coefficient(NCC)
-//                    int state=0;
-//                    cv::Point2f pt1,pt2;
-//                    double mcc=nccMatch(tmp,src,pt1,pt2,state);
-
-//                    //state=1;
-
-//                    if(state){
-//                        //suppress correspondences with low correlation coefficient
-//                        if (mcc>=ccLimit){
-//                            Match match;
-//                            match.p1=pt;
-//                            match.p2=right_pt+pt2;
-//                            match.cc=mcc;
-//                            match.windowSize=windowSize;
-//                            if(((match.p1.x-match.p2.x)<(disparity+Xtor)) && ((match.p1.x-match.p2.x)>(disparity-Xtor))){
-//                                //disparity constraint
-//                                matches.push_back(match);
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+                    //                    if(state){
+                    //                        //suppress correspondences with low correlation coefficient
+                    //                        if (mcc>=ccLimit){
+                    //                            Match match;
+                    //                            match.p1=pt;
+                    //                            match.p2=right_pt+pt2;
+                    //                            match.cc=mcc;
+                    //                            match.windowSize=windowSize;
+                    //                            if(((match.p1.x-match.p2.x)<(disparity+Xtor)) && ((match.p1.x-match.p2.x)>(disparity-Xtor))){
+                    //                                //disparity constraint
+                    //                                matches.push_back(match);
+                    //                            }
+                    //                        }
+                    //                    }
+                    //                }
+                    //            }
+                    }
+                }
+            }
+        }
+    }
 }
 
 

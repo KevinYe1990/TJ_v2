@@ -11,8 +11,7 @@
 //double fitSurface(const std::vector<cv::Point3f> gcps,const cv::Point2f pt);
 
 //new.match
-void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coeff,int order=2);
-bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y);
+
 bool checkSize(const Mat& src,Rect range);
 
 void Match2DMatch(const vector<Match>& src,vector<cv::DMatch>& dst,
