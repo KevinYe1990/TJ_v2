@@ -12,7 +12,6 @@ TEMPLATE = app
 INCLUDEPATH +=/usr/local/include              \
               /usr/local/include/opencv       \
               /usr/local/include/opencv2      \
-              /usr/local/include/eigen3        \
 
 LIBS += -L/usr/local/lib                        \
         -lopencv_features2d                     \
@@ -34,6 +33,15 @@ LIBS += -L/usr/local/lib                        \
         -lopencv_nonfree                        \
 
 HEADERS += \
+<<<<<<< HEAD
+    core.h \
+    common.h
+
+SOURCES += \
+    main.cpp \
+    core.cpp \
+    common.cpp
+=======
     common.h \
     core.h \
     match.h \
@@ -45,9 +53,10 @@ SOURCES += \
     core.cpp \
     match.cpp \
     delaunay.cpp
+>>>>>>> origin/master
 
 QMAKE_CXXFLAGS += -fopenmp
-#QMAKE_MAC_SDK = macosx10.11
+QMAKE_MAC_SDK = macosx10.11
 
 #LIBS += -fopenmp
 

@@ -17,7 +17,12 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/features2d/features2d.hpp"
+<<<<<<< HEAD
+//Eigen 3.2.8
+#include "eigen3/Eigen/Eigen"
+=======
 #include "opencv2/core/eigen.hpp"
+>>>>>>> origin/master
 
 using namespace std;
 using namespace cv;

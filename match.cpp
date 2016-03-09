@@ -17,20 +17,20 @@ void nccMatch(const Mat &tpl, const Mat &src, Point2d &pt1, Point2d &pt2,
     //Localizing the best match with minMaxLoc
     double minVal;
     Point minLoc,maxLoc;
-    pt1.x=tpl.cols/2.0d;
-    pt1.y=tpl.rows/2.0d;
+    pt1.x=tpl.cols/2.0;
+    pt1.y=tpl.rows/2.0;
     minMaxLoc(ccMat,&minVal,&maxCC,&minLoc,&maxLoc,Mat());
     //initial location, and it will be covered if interpolation is performed
-    pt2.x=(double)maxLoc.x+tpl.cols/2.0d;
-    pt2.y=(double)maxLoc.y+tpl.rows/2.0d;
+    pt2.x=(double)maxLoc.x+tpl.cols/2.0;
+    pt2.y=(double)maxLoc.y+tpl.rows/2.0;
     //refine the location by using interpolation
     if(interpolation){
         if(checkSize(ccMat,Rect(maxLoc.x-1,maxLoc.y-1,3,3))){
             Mat patch=ccMat(Rect(maxLoc.x-1,maxLoc.y-1,3,3));
             double x,y;
             if(state=fit2ndPolynomial(patch,x,y)){
-                pt2.x+=x-1.5d;
-                pt2.y+=y-1.5d;
+                pt2.x+=x-1.5;
+                pt2.y+=y-1.5;
             }
         }
     }
@@ -159,14 +159,14 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
 //    vector<KeyPoint> left_kpts,right_kpts;
 //    Match2DMatch(matches4Ctrls,terrainCtrls,left_kpts,right_kpts);
     Delaunay tri(leftImg);
-    tri.generateDelaunay(matches4Ctrls);
+//    tri.generateDelaunay(matches4Ctrls);
 
     //traversing the triangulation
-    int n=tri.getNumOfTRI();
-    for(int i=0;i<n;++i){
+//    int n=tri.getNumOfTRI();
+//    for(int i=0;i<n;++i){
         //find features within the triangle
 
-    }
+//    }
 
 //
 //        cv::Vec6f t1=(*iter1);

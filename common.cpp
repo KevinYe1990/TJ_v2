@@ -182,7 +182,6 @@ void readMatches(const string filename, vector<Match> &matches, int withCC, int 
     in.close();
 }
 
-
 void getPtsFromMatches(const vector<Match> &matches, vector<Point2f> &lpts, vector<Point2f> &rpts)
 {
     assert(matches.size()>0);
