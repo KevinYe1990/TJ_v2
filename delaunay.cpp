@@ -12,9 +12,9 @@ void Delaunay::drawDelaunay(const Mat& src,Scalar delaunayColor){
 
         draw=true;
         Point2f pts[3];
-        pts[0]=tri.vertices[0];
-        pts[1]=tri.vertices[1];
-        pts[2]=tri.vertices[2];
+        pts[0]=tri.vtx[0].pt;
+        pts[1]=tri.vtx[1].pt;
+        pts[2]=tri.vtx[2].pt;
 
         for(int i=0;i<3;i++){
             if((pts[i].x>src.cols-1)||(pts[i].y>src.rows-1)||(pts[i].x<0)||(pts[i].y<0))
@@ -27,7 +27,7 @@ void Delaunay::drawDelaunay(const Mat& src,Scalar delaunayColor){
             cv::line(dst, pts[2], pts[0], delaunayColor, 1);
         }
     }
-    showImage(dst);
+    showImage(dst,"Delaunay",imagescale);
 }
 
 double Delaunay::calTriArea(const Point2f pt1, const Point2f pt2, const Point2f pt3)
@@ -41,57 +41,88 @@ double Delaunay::calTriArea(const Point2f pt1, const Point2f pt2, const Point2f 
     return contourArea(contour);
 }
 
-void Delaunay::generateDelaunay(const vector<Point2f> &pts)
+double Delaunay::calTriArea(const Delaunay::vertex *v)
 {
-    this->insert(pts);
-    getTriangulation();
+    Point2f p1,p2,p3;
+    p1=v[0].pt;
+    p2=v[1].pt;
+    p3=v[2].pt;
+    return calTriArea(p1,p2,p3);
 }
 
-void Delaunay::generateDelaunay(const vector<KeyPoint> &kpts){
+void Delaunay::generateDelaunay(const vector<Point2f> &pts,const vector<double>& attribute)
+{
+    this->insert(pts);
+    getTriangulation(attribute);
+    std::sort(triangulation.begin(),triangulation.end(),compTri);//descend
+}
+
+void Delaunay::generateDelaunay(const vector<KeyPoint> &kpts,const vector<double>& attribute){
     vector<Point2f> pts;
     KeyPoint2Point2f(kpts,pts);
-    generateDelaunay(pts);
+    generateDelaunay(pts,attribute);
+}
+
+void Delaunay::generateDelaunay(const vector<Match> &matches)
+{
+    vector<double> attribute;
+    for(int i=0;i<matches.size();++i){
+        double attri=matches[i].p1.x-matches[i].p2.x;
+        attribute.push_back(attri);
+    }
+    vector<Point2f> l,r;
+    getPtsFromMatches(matches,l,r);
+    generateDelaunay(l,attribute);
 }
 
 void Delaunay::getTriangulation(const vector<double> &attribute){
+    vector<double> attri_backup=attribute;
+
+    if(attribute.size()!=0)
+        assert(attribute.size()==(this->vtx.size()-4));
+    else
+        attri_backup=vector<double>(this->vtx.size()-4,0);
+
             triangulation.clear();
-            int i, total = (int)(this->qedges.size()*4);
+            int total = (int)(this->qedges.size()*4);
             vector<bool> edgemask(total, false);
             int idx=0;
 
-            for( i = 4; i < total; i += 2 ){
+            for(int i = 4; i < total; i += 2 ){
                 if( edgemask[i] )
                     continue;
-                Point2f a, b, c;
+                Point2f pt[3];
+                int pt_id[3];
+
                 int edge = i;
-                int A=edgeOrg(edge, &a);
-                if (A<4) continue;
-                edgeOrg(edge,&a);
+
+                pt_id[0]=edgeOrg(edge, &pt[0]);
+                if (pt_id[0]<4) continue;
+                edgeOrg(edge, &pt[0]);
                 edgemask[edge] = true;
                 edge = getEdge(edge, NEXT_AROUND_LEFT);
-                int B=edgeOrg(edge, &b);
-                if(B<4) continue;
-                edgeOrg(edge, &b);
+
+                pt_id[1]=edgeOrg(edge, &pt[1]);
+                if(pt_id[1]<4) continue;
+                edgeOrg(edge, &pt[1]);
                 edgemask[edge] = true;
                 edge = getEdge(edge, NEXT_AROUND_LEFT);
-                int C=edgeOrg(edge, &c);
-                if(C<4) continue;
-                edgeOrg(edge, &c);
+
+                pt_id[2]=edgeOrg(edge, &pt[2]);
+                if(pt_id[2]<4) continue;
+                edgeOrg(edge, &pt[2]);
                 edgemask[edge] = true;
 
                 triangle tri;
                 tri.id=idx++;
-                //                tri.pts_id[0]=A;
-                //                tri.pts_id[1]=B;
-                //                tri.pts_id[2]=C;
-                tri.vertices[0]=a;
-                tri.vertices[1]=b;
-                tri.vertices[2]=c;
-                tri.area=calTriArea(a,b,c);
-                //???????????????
-                tri.attribute[0]=attribute[A-4];
-                tri.attribute[1]=attribute[B-4];
-                tri.attribute[2]=attribute[C-4];
+                for(int k=0;k<3;++k){
+                    vertex v;
+                    v.id=k;
+                    v.pt=pt[k];
+                    v.attr=attri_backup[pt_id[k]-4];
+                    tri.vtx[k]=v;
+                }
+                tri.area=calTriArea(tri.vtx);
 
                 triangulation.push_back(tri);
             }

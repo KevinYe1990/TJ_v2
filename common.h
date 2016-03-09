@@ -17,12 +17,7 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/nonfree/features2d.hpp"
 #include "opencv2/features2d/features2d.hpp"
-<<<<<<< HEAD
-//Eigen 3.2.8
-#include "eigen3/Eigen/Eigen"
-=======
 #include "opencv2/core/eigen.hpp"
->>>>>>> origin/master
 
 using namespace std;
 using namespace cv;
@@ -31,10 +26,13 @@ using namespace Eigen;
 extern Mat img1,img2;
 extern char *filename;
 extern string directory;
+extern double imagescale;
 
 struct Match{
     Match(){}
     Match(Point2f p1,Point2f p2):p1(p1),p2(p2),windowSize(0),corr(0),angle(0),speed(0){}
+    double getParaX(){return (double)(p1.x-p2.x);}
+    double getParaY(){return (double)(p1.y-p2.y);}
     cv::Point2f p1;
     cv::Point2f p2;
     int windowSize;
@@ -66,7 +64,7 @@ void readKeyPoints(const string filename,vector<cv::KeyPoint>& kpts);
 void readMatches(const string filename,vector<Match>& matches,int withCC=false, int withWindowSize=false);
 void getPtsFromMatches(const vector<Match>& matches,vector<Point2f>& lpts,vector<Point2f>& rpts);
 void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoint>& left);
-bool camp(const cv::KeyPoint& rhs, const cv::KeyPoint& lhs);
+bool compKeyPoints(const cv::KeyPoint& rhs, const cv::KeyPoint& lhs);
 
 
 //_DEBUG

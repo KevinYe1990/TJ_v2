@@ -6,6 +6,7 @@ using namespace std;
 
 //global variables and functions
 string img1Path,img2Path,directory;
+double imagescale=1.0;
 char *filename;
 Mat img1,img2;
 int c/*,except=0,number=0,found=0*/;
@@ -38,6 +39,8 @@ int main(int argc, char *argv[]){
     img1=imread(img1Path);
     readConfigFile(filename,"img2Path",img2Path);
     img2=imread(img2Path);
+
+    readConfigFile(filename,"DisplayScale",imagescale);
 
 #ifdef _debug
 

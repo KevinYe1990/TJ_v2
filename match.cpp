@@ -159,7 +159,7 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
 //    vector<KeyPoint> left_kpts,right_kpts;
 //    Match2DMatch(matches4Ctrls,terrainCtrls,left_kpts,right_kpts);
     Delaunay tri(leftImg);
-//    tri.generateDelaunay(matches4Ctrls);
+    tri.generateDelaunay(matches4Ctrls);
 
     //traversing the triangulation
 //    int n=tri.getNumOfTRI();

@@ -1,6 +1,6 @@
 #include "common.h"
 
-bool camp(const KeyPoint& rhs, const KeyPoint& lhs){
+bool compKeyPoints(const KeyPoint& rhs, const KeyPoint& lhs){
     if (rhs.pt.x < lhs.pt.x){
         return true;
     }
@@ -227,12 +227,12 @@ void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoin
 
     KeyPoint::convert(rpts, r_pts);
 
-    std::sort(keypts.begin(), keypts.end(),camp);
-    std::sort(r_pts.begin(), r_pts.end(), camp);
+    std::sort(keypts.begin(), keypts.end(),compKeyPoints);
+    std::sort(r_pts.begin(), r_pts.end(), compKeyPoints);
     std::set_difference(
         keypts.begin(), keypts.end(),
         r_pts.begin(), r_pts.end(),
-        std::back_inserter(left), camp
+        std::back_inserter(left), compKeyPoints
         );
 
     std::printf("The total KeyPoint number is: %d.\n"
@@ -267,3 +267,4 @@ Mat genRandMat(int rows, int cols, int depth){
         }
     return dst;
 }
+

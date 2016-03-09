@@ -4,13 +4,11 @@
 bool extractFeatures(char *type){
     Ptr<FeatureDetector> detector;
     vector<KeyPoint> keypoints;
-    double scale=1;
     string ImageID="left",outPath=directory+"keypoints.txt";
     bool display=false;
     bool saveKpts=false;
     //read common key variables
     readConfigFile(filename,"ImageID",ImageID);
-    readConfigFile(filename,"DisplayScale",scale);
     readConfigFile(filename,"DisplayKeypoints",display);
     readConfigFile(filename,"SaveKeypoints",saveKpts);
     readConfigFile(filename,"SaveKeypointsPath",outPath);
@@ -106,9 +104,9 @@ bool extractFeatures(char *type){
 
     if(display)
         if(ImageID=="right")
-            showKeypoints(img2,keypoints,scale);
+            showKeypoints(img2,keypoints,imagescale);
         else
-            showKeypoints(img1,keypoints,scale);
+            showKeypoints(img1,keypoints,imagescale);
 
     if(saveKpts){
         printKeypoints(outPath,keypoints);
@@ -123,7 +121,7 @@ void performMatching(char *type)
     readMatches(terrainCtrlsPath,terrainCtrls);
     vector<Point2f> l,r;
     getPtsFromMatches(terrainCtrls,l,r);
-    Delaunay del(img2);
-    del.generateDelaunay(l);
-    del.drawDelaunay(img2);
+    Delaunay del(img1);
+    del.generateDelaunay(terrainCtrls);
+    del.drawDelaunay(img1);
 }
