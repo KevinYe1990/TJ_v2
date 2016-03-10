@@ -43,7 +43,7 @@ bool Delaunay::iswithinTri(const Point2f &pt, int tri_id)
 double Delaunay::interpolateAttr(const Point2f &pt, int tri_id){
     MatrixXd A(3,3);
     Vector3d yv_mapped(-1,-1,-1);
-    VectorXd result;
+    VectorXd coeff;
     triangle tri=triangulation[tri_id];
 
     //create matrix
@@ -54,9 +54,23 @@ double Delaunay::interpolateAttr(const Point2f &pt, int tri_id){
     }
 
     //solve for linear least squares fit
-    result=A.householderQr().solve(yv_mapped);
+    ColPivHouseholderQR<MatrixXd> qr_decomp(A);
+    auto rank_A=qr_decomp.rank();
+    MatrixXd B(A.rows(),yv_mapped.cols()+A.cols());
+    B<<A,yv_mapped;
+    qr_decomp.compute(B);
+    auto rank_B=qr_decomp.rank();
+    double result;
+    if(rank_A==rank_B && rank_A==A.cols()){
+            coeff=A.householderQr().solve(yv_mapped);
+            result=(-1.0-coeff[0]*pt.x-coeff[1]*pt.y)/coeff[2];
+    }
+    else if(A(0,2)==A(1,2) && A(1,2)==A(2,2))
+        result=A(0,2);
+    else
+        exitwithErrors("Error occured while predicting the disparity!");
 
-    return (-1.0-result[0]*pt.x-result[1]*pt.y)/result[2];
+    return result;
 }
 
 

@@ -43,7 +43,13 @@ int main(int argc, char *argv[]){
     readConfigFile(filename,"DisplayScale",imagescale);
 
 #ifdef _debug
-
+double x=1.37,y=2.68;
+Point2f p1=Point2d(x,y);
+Rect r(x,y,5,5);
+//cout<<p1.x<<","<<p1.y<<endl;
+//cout<<r.x<<","<<r.y<<endl;
+cout<<floor(2.37)<<","<<floor(1.69)<<endl;
+return 0;
 #endif
 
     while(--argc>0 && (*++argv)[0]=='-')

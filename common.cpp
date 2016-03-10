@@ -20,6 +20,42 @@ void KeyPoint2Point2f(const vector<KeyPoint>& src, vector<Point2f>& dst){
         dst.push_back(src[i].pt);
 }
 
+void showMatches(const Mat& refImg,const Mat& schImg,const vector<Match> matches,double scale){
+    assert(matches.size()>0);
+    vector<DMatch> dmatches;
+    vector<KeyPoint> leftkpts,rightkpts;
+    Match2DMatch(matches,dmatches,leftkpts,rightkpts);
+
+    Mat tmp;
+    drawMatches(refImg,leftkpts,schImg,rightkpts,dmatches,tmp);
+    resize(tmp,tmp,cv::Size(tmp.cols*scale,tmp.rows*scale));
+
+    imshow("Matching Result.",tmp);
+    waitKey(0);
+}
+
+void Match2DMatch(const vector<Match>& src,vector<DMatch>& dst,
+                   vector<KeyPoint>& leftkpts,vector<KeyPoint>& rightkpts){
+    assert(src.size()>0);
+    std::vector<Match>::const_iterator iter=src.begin();
+    dst.clear();
+    leftkpts.clear();
+    rightkpts.clear();
+    int count=0;
+    for(;iter<src.end();++iter){
+        cv::KeyPoint kpt;
+        kpt.pt=(*iter).p1;
+        leftkpts.push_back(kpt);
+        kpt.pt=(*iter).p2;
+        rightkpts.push_back(kpt);
+        cv::DMatch match;
+        match.queryIdx=count;
+        match.trainIdx=count;
+        count+=1;
+        dst.push_back(match);
+    }
+}
+
 void Point2f2KeyPoint(const vector<Point2f>& src, vector<KeyPoint>& dst){
     dst.clear();
     for (size_t i=0; i<src.size();++i)
@@ -58,6 +94,35 @@ void showImage(Mat &img,string title,double scale){
     resize(tmp,tmp,Size(tmp.cols*scale,tmp.rows*scale));
     imshow(title,tmp);
     waitKey(0);
+}
+
+void printMatches(string filename,const vector<Match>& matches,int mode){
+    ofstream out;
+    switch(mode){
+    case 0:
+        out.open(filename,ios::out);
+        break;
+    case 1:
+        out.open(filename,ios::app);
+        break;
+    default:
+        exitwithErrors("Error occured while writing matching results!");
+    }
+
+    if(out.is_open()){
+        vector<Match>::const_iterator iter;
+        for(iter=matches.begin();iter!=matches.end();++iter){
+            if(iter==matches.begin())
+                out<<endl;
+            if(iter==matches.end()-1)
+                out<<(*iter).p1.x<<"\t"<<(*iter).p1.y<<"\t"<<(*iter).p2.x<<"\t"<<(*iter).p2.y;
+            else
+                out<<(*iter).p1.x<<"\t"<<(*iter).p1.y<<"\t"<<(*iter).p2.x<<"\t"<<(*iter).p2.y<<endl;
+        }
+        out.close();
+    }else
+        exitwithErrors("Unable to open the output file!");
+
 }
 
 void showKeypoints(const Mat img,const vector<KeyPoint> &kpts,double scale){
@@ -262,7 +327,7 @@ void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coe
         coeff[i]=result[i];
 }
 
-bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y){
+void fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y){
     MatrixXd cc_eigen;
     cv2eigen(cc_Mat,cc_eigen);
     vector<double> vv={0.5,1.5,2.5};
@@ -275,12 +340,6 @@ bool fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y){
     polyfit(vv,yv,coeff2,2);
     x=-coeff1[1]/(2.0*coeff1[2]);
     y=-coeff2[1]/(2.0*coeff2[2]);
-
-    double thresh=1.0;
-    if((fabs(x-1.5)<=thresh) && (fabs(y-1.5)<=thresh))
-        return 1;
-    else
-        return 0;
 }
 
 

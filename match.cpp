@@ -1,7 +1,7 @@
 #include "match.h"
 
-void nccMatch(const Mat &tpl, const Mat &src, Point2d &pt1, Point2d &pt2,
-                double &maxCC, int& state,bool interpolation){
+void nccMatch(const Mat &tpl, const Mat &src, Point2f &pt1, Point2f &pt2,
+                double &maxCC, int& state,bool interpolation,double tolerance){
     //make sure that both the size of tmp and src are even
     assert(tpl.rows%2==0);
     assert(tpl.cols%2==0);
@@ -24,75 +24,20 @@ void nccMatch(const Mat &tpl, const Mat &src, Point2d &pt1, Point2d &pt2,
     pt2.x=(double)maxLoc.x+tpl.cols/2.0;
     pt2.y=(double)maxLoc.y+tpl.rows/2.0;
     //refine the location by using interpolation
+    state=false;
     if(interpolation){
         if(checkSize(ccMat,Rect(maxLoc.x-1,maxLoc.y-1,3,3))){
             Mat patch=ccMat(Rect(maxLoc.x-1,maxLoc.y-1,3,3));
             double x,y;
-            if(state=fit2ndPolynomial(patch,x,y)){
+            fit2ndPolynomial(patch,x,y);
+            if(fabs(x-1.5)<=tolerance && fabs(y-1.5)<=tolerance){
+                state=true;
                 pt2.x+=x-1.5;
                 pt2.y+=y-1.5;
             }
         }
     }
 }
-
-
-//double prediction(cv::Vec6f t1,cv::Vec6f t2,cv::Point2f pt,int flag){
-//    double disparity=0;
-
-//    cv::Mat A(6,6,CV_64FC1);
-//    cv::Mat L(6,1,CV_64FC1);
-
-//    for(int i=0;i<3;i++){
-//        double x1,y1,x2,y2;
-//        x1=t1[i*2];y1=t1[i*2+1];
-//        x2=t2[i*2];y2=t2[i*2+1];
-
-//        double row11[1][6]={1,x1,y1,0,0,0};
-//        cv::Mat row1(1,6,CV_64FC1,row11);
-//        row1.copyTo(A.row(2*i));
-
-//        double row22[1][6]={0,0,0,1,x1,y1};
-//        cv::Mat row2(1,6,CV_64FC1,row22);
-//        row2.copyTo(A.row(2*i+1));
-
-//        L.at<double>(2*i,0)=x2;
-//        L.at<double>(2*i+1,0)=y2;
-//    }
-
-//    cv::Mat X(6,1,CV_64FC1);
-//    X=A.inv()*L;
-//    if(flag==0)
-//        disparity=pt.x-(X.at<double>(0,0)+X.at<double>(1,0)*pt.x+X.at<double>(2,0)*pt.y);
-//        else
-//        disparity=pt.y-(X.at<double>(3,0)+X.at<double>(4,0)*pt.x+X.at<double>(5,0)*pt.y);
-
-//    return disparity;
-//}
-
-////double fitSurface(const std::vector<cv::Point3f> gcps,const cv::Point2f pt){
-//    double disparity=0;
-//    double x1,y1,z1,x2,y2,z2,x3,y3,z3;
-//    x1=gcps[0].x;y1=gcps[0].y;z1=gcps[0].z;
-//    x2=gcps[1].x;y2=gcps[1].y;z2=gcps[1].z;
-//    x3=gcps[2].x;y3=gcps[2].y;z3=gcps[2].z;
-
-//    double A,B,C,D;
-//    A = y1*(z2-z3)+y2*(z3-z1)+y3*(z1-z2);
-//    B = z1*(x2-x3)+z2*(x3-x1)+z3*(x1-x2);
-//    C = x1*(y2-y3)+x2*(y3-y1)+x3*(y1-y2);
-//    D = -x1*(y2*z3-y3*z2)-x2*(y3*z1-y1*z3)-x3*(y1*z2-y2*z1);
-
-//    if(C!=0)
-//        disparity=-(A*pt.x+B*pt.y+D)/C;
-//    else
-//        disparity=z1;
-
-//    return disparity;
-//}
-
-
-
 
 bool checkSize(const Mat& src,Rect range){
     bool con1=false,con2=false;
@@ -110,13 +55,8 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
     matches.clear();
     assert(windowSize%2==0);
     assert(searchSize%2==0);
-//    assert(Xtor>=0);
     int windowRadius=(windowSize/2);
     int searchRadius=(searchSize/2);
-    //generate Triangulations for both images
-//    vector<DMatch> terrainCtrls;
-//    vector<KeyPoint> left_kpts,right_kpts;
-//    Match2DMatch(matches4Ctrls,terrainCtrls,left_kpts,right_kpts);
     Delaunay tri(leftImg);
     tri.generateDelaunay(matches4Ctrls);
 
@@ -130,46 +70,41 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
             if(featureMask[j]){
                 if(tri.iswithinTri(features[j].pt,i)){
                     //feature inside the triangle
+                    Point2f feature=features[j].pt;
                     featureMask[j]=false;
-                    double preParaX=tri.interpolateAttr(features[i].pt,i);
-                    {//            cv::Point2f pt,left_pt,right_pt;
-                    //            pt=(*iter);
-                    //            left_pt=pt-cv::Point2f(windowRadius,windowRadius);
-                    //            //check if the range is beyond the range of the left image
-                    //            cv::Rect range(left_pt.x,left_pt.y,windowRadius*2,windowRadius*2);
-                    //            if(checkSize(leftImage,range)){
-                    //                //crop the left image patch
-                    //                cv::Mat tmp=leftImage(range);
-                    //                //higher left corner of the search patch
-                    //                right_pt=pt-cv::Point2f(disparity,0)-cv::Point2f(searchRadius,torOfEpipolar+windowRadius);
-                    //                //check if the range is beyond the range of the right image
-                    //                range=cv::Rect(right_pt.x,right_pt.y,searchRadius*2,(windowRadius+torOfEpipolar)*2);
-                    //                if((checkSize(rightImage,range))){
-                    //                    //crop the right image patch
-                    //                    cv::Mat src=rightImage(range);
-                    //                    //normalized correlation coefficient(NCC)
-                    //                    int state=0;
-                    //                    cv::Point2f pt1,pt2;
-                    //                    double mcc=nccMatch(tmp,src,pt1,pt2,state);
-
-                    //                    //state=1;
-
-                    //                    if(state){
-                    //                        //suppress correspondences with low correlation coefficient
-                    //                        if (mcc>=ccLimit){
-                    //                            Match match;
-                    //                            match.p1=pt;
-                    //                            match.p2=right_pt+pt2;
-                    //                            match.cc=mcc;
-                    //                            match.windowSize=windowSize;
-                    //                            if(((match.p1.x-match.p2.x)<(disparity+Xtor)) && ((match.p1.x-match.p2.x)>(disparity-Xtor))){
-                    //                                //disparity constraint
-                    //                                matches.push_back(match);
-                    //                            }
-                    //                        }
-                    //                    }
-                    //                }
-                    //            }
+                    double disparity=tri.interpolateAttr(feature,i);
+                    Point2i PointOfLeftImg,PointOfRightImg;
+                    PointOfLeftImg=Point2i(floor(feature.x-windowRadius),floor(feature.y-windowRadius));
+                    //************************NOTE:***********************
+                    PointOfRightImg=Point2i(floor(feature.x-disparity-searchRadius),
+                                            floor(feature.y-torOfEpipolar-windowRadius));
+                    //*****************************************************
+                    //check if the range is beyond the range of the left image
+                    Rect templateRange(PointOfLeftImg,Size(windowRadius*2,windowRadius*2));
+                    Rect searchRange(PointOfRightImg,Size(searchRadius*2,2*(torOfEpipolar+windowRadius)));
+                    if(checkSize(leftImg,templateRange) && checkSize(rightImg,searchRange)){
+                        //crop the patches
+                        Mat templ=leftImg(templateRange);
+                        Mat search=rightImg(searchRange);
+                        //normalized correlation coefficient(NCC)
+                        int state=0;
+                        double mcc;
+                        cv::Point2f pt1,pt2;
+                        nccMatch(templ,search,pt1,pt2,mcc,state);
+                        if(state){
+                            //remove candidates with low correlation coefficient
+                            if(mcc>=mccThresh){
+                                Match match;
+                                match.p1=feature;
+                                match.p2=Point2f(PointOfRightImg.x,PointOfRightImg.y)+pt2;
+                                match.corr=mcc;
+                                match.windowSize=windowSize;
+                                if(fabs(match.p1.y-match.p2.y)<=torOfEpipolar){
+                                    //Y parallax constraint
+                                    matches.push_back(match);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -178,24 +113,102 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
 }
 
 
-void Match2DMatch(const vector<Match> &src, vector<DMatch> &dst, vector<KeyPoint> &leftkpts, vector<KeyPoint> &rightkpts)
+
+
+
+Mat ransacTest(const vector<Match> &src, vector<Match> &dst,int method,double minDistance,double confidence)
 {
-    assert(src.size()>0);
+    vector<Match> backup=src;
     dst.clear();
-    leftkpts.clear();
-    rightkpts.clear();
-    int count=0;
-    for(vector<Match>::const_iterator iter=src.begin();iter<src.end();++iter){
-        KeyPoint kpt;
-        kpt.pt=(*iter).p1;
-        leftkpts.push_back(kpt);
-        kpt.pt=(*iter).p2;
-        rightkpts.push_back(kpt);
-        DMatch match;
-        match.queryIdx=count;
-        match.trainIdx=count++;
-        dst.push_back(match);
+    // Convert keypoints into Point2f
+    vector<Point2f> queryPoints, trainPoints;
+    Mat fundamentalMat;
+    getPtsFromMatches(backup,queryPoints,trainPoints);
+    // Compute F matrix using RANSAC
+    vector<uchar> inliers(queryPoints.size(),0);
+    if (queryPoints.size()>0&&trainPoints.size()>0)
+    {
+        fundamentalMat= findFundamentalMat(Mat(queryPoints),Mat(trainPoints), // matching points
+                                           inliers,       // match status (inlier or outlier)
+                                           method, // RANSAC method
+                                           minDistance,  // distance to epipolar line
+                                           confidence); // confidence probability
+
+
+        // extract the surviving (inliers) matches
+        vector<uchar>::const_iterator	itIn= inliers.begin();
+        vector<Match>::const_iterator	itM= backup.begin();
+        // for all matches
+        for ( ;itIn!= inliers.end(); ++itIn, ++itM)
+            if (*itIn) dst.push_back(*itM);
+
+        // The F matrix will be recomputed with all accepted matches
+        // Convert keypoints into Point2f for final F computation
+        queryPoints.clear();
+        trainPoints.clear();
+        getPtsFromMatches(dst,queryPoints,trainPoints);
+        // Compute 8-point F from all accepted matches
+        if (queryPoints.size()>0&&trainPoints.size()>0)
+            fundamentalMat= cv::findFundamentalMat(Mat(queryPoints),Mat(trainPoints), // matches
+                                                   method);
+    }
+
+    return fundamentalMat;
+}
+
+
+void refineMatches(const Mat& leftImg, const Mat& rightImg,const vector<Match>& src,vector<Match>& dst,
+                   int windowSize,int torOfX,double mccThresh, bool resetY, int torOfY){
+    vector<Point2f> lpts,rpts;
+    getPtsFromMatches(src,lpts,rpts);
+
+    int windowRadius=windowSize/2;
+    dst.clear();
+
+    for(int i=0;i<lpts.size();++i){
+
+        Point2i PointOfLeftImg=Point2i(floor(lpts[i].x-windowRadius),floor(lpts[i].y-windowRadius));
+        Rect templateRange=Rect(PointOfLeftImg,Size(windowRadius*2,windowRadius*2));
+
+        Point2i PointOfRightImg;
+        if(resetY)
+            PointOfRightImg=Point2i(floor(rpts[i].x-windowRadius-torOfX),floor(lpts[i].y-windowRadius-torOfY));
+        else
+            PointOfRightImg=Point2i(floor(rpts[i].x-windowRadius-torOfX),floor(rpts[i].y-windowRadius-torOfY));
+
+        Rect searchRange=Rect(PointOfRightImg,Size((windowRadius+torOfX)*2,(windowRadius+torOfY)*2));
+
+        if(checkSize(leftImg,templateRange) && checkSize(rightImg,searchRange)){
+            Mat templ=leftImg(templateRange);
+            Mat search=rightImg(searchRange);
+            Point2f pt1,pt2;
+            double mcc;
+            int state=false;
+            nccMatch(templ,search,pt1,pt2,mcc,state,true,1.0);
+            if(mcc>=mccThresh)
+                if(state){
+                    Match match;
+                    match.p1=lpts[i];
+                    match.p2=Point2f(PointOfRightImg.x,PointOfRightImg.y)+pt2;
+                    match.corr=mcc;
+                    match.windowSize=windowSize;
+                    dst.push_back(match);
+                }
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

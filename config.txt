@@ -1,33 +1,35 @@
 #**************************CONFIGURATION FOR TJ TO RUN************************
 #============================================================================#
 ###paths of image pair
-img1Path=/home/kevin/Documents/win7share/src.jpg
-img2Path=/home/kevin/Documents/win7share/tpl.jpg
-DisplayScale=1
+img1Path=/home/kevin/Desktop/TJ_v2/left.jpg
+img2Path=/home/kevin/Desktop/TJ_v2/right.jpg
+DisplayScale=.5
 
 ###feature type:1)good feature; 2)fast feature; 3)grid feature
 #ImageID=left
 DisplayKeypoints=true
 SaveKeypoints=true
-#SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
+SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
 #*********parameters of the good feature algorithm*********
-#maxCorners=2000
-#qualityLevel=0.001
+maxCorners=2000
+qualityLevel=0.01
 #minDistance=5
-#blockSize=5
+blockSize=50
 #useHarrisDetector=false
 #k=0.04
 #*********parameters of the Fast algorithm*********
-threshold=5;
+threshold=50;
 #nonmaxSuppression=true;
 #*********parameters of the grid feature algorithm*********
 #initFeatureScale=1f
 #featureScaleMul=0.1f
 #featureScaleLevels=1
-#initXyStep=10
+initXyStep=50
 #initImgBound=0
 #varyXyStepWithScale=true
 #varyImgBoundWithScale=false
 
 #*********Terrain Controls for Matching*********
 terrainCtrlsPath=/home/kevin/Desktop/TJ_v2/tctrls.txt
+featuresPath=/home/kevin/Documents/win7share/keypoints.txt
+matchesToPassPath=/home/kevin/Documents/win7share/output/delivery.txt
