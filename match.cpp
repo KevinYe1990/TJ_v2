@@ -76,12 +76,14 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
                     Point2i PointOfLeftImg,PointOfRightImg;
                     PointOfLeftImg=Point2i(floor(feature.x-windowRadius),floor(feature.y-windowRadius));
                     //************************NOTE:***********************
+                    //one pixel shift
                     PointOfRightImg=Point2i(floor(feature.x-disparity-searchRadius),
                                             floor(feature.y-torOfEpipolar-windowRadius));
                     //*****************************************************
                     //check if the range is beyond the range of the left image
                     Rect templateRange(PointOfLeftImg,Size(windowRadius*2,windowRadius*2));
-                    Rect searchRange(PointOfRightImg,Size(searchRadius*2,2*(torOfEpipolar+windowRadius)));
+                    //enlarge by one+one pixel
+                    Rect searchRange(PointOfRightImg,Size((searchRadius)*2,(torOfEpipolar+windowRadius)*2));
                     if(checkSize(leftImg,templateRange) && checkSize(rightImg,searchRange)){
                         //crop the patches
                         Mat templ=leftImg(templateRange);
@@ -163,6 +165,7 @@ void refineMatches(const Mat& leftImg, const Mat& rightImg,const vector<Match>& 
     getPtsFromMatches(src,lpts,rpts);
 
     int windowRadius=windowSize/2;
+    int shift=1;
     dst.clear();
 
     for(int i=0;i<lpts.size();++i){
@@ -172,11 +175,13 @@ void refineMatches(const Mat& leftImg, const Mat& rightImg,const vector<Match>& 
 
         Point2i PointOfRightImg;
         if(resetY)
-            PointOfRightImg=Point2i(floor(rpts[i].x-windowRadius-torOfX),floor(lpts[i].y-windowRadius-torOfY));
+            PointOfRightImg=Point2i(floor(rpts[i].x-windowRadius-torOfX-shift),
+                                    floor(lpts[i].y-windowRadius-torOfY-shift));
         else
-            PointOfRightImg=Point2i(floor(rpts[i].x-windowRadius-torOfX),floor(rpts[i].y-windowRadius-torOfY));
+            PointOfRightImg=Point2i(floor(rpts[i].x-windowRadius-torOfX-shift),
+                                    floor(rpts[i].y-windowRadius-torOfY-shift));
 
-        Rect searchRange=Rect(PointOfRightImg,Size((windowRadius+torOfX)*2,(windowRadius+torOfY)*2));
+        Rect searchRange=Rect(PointOfRightImg,Size((windowRadius+torOfX+shift)*2,(windowRadius+torOfY+shift)*2));
 
         if(checkSize(leftImg,templateRange) && checkSize(rightImg,searchRange)){
             Mat templ=leftImg(templateRange);
