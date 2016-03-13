@@ -1,0 +1,33 @@
+#**************************CONFIGURATION FOR TJ TO RUN************************
+#============================================================================#
+###paths of image pair
+img1Path=/Users/Kevin/Desktop/TJ_v2/tpl.jpg
+img2Path=/Users/Kevin/Desktop/TJ_v2/src.jpg
+     
+###feature type:1)good feature; 2)fast feature; 3)grid feature
+#ImageID=left
+DisplayKeypoints=true
+DisplayScale=.2
+SaveKeypoints=true
+#SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
+#*********parameters of the good feature algorithm*********
+#maxCorners=2000
+#qualityLevel=0.001
+#minDistance=5
+#blockSize=5
+#useHarrisDetector=false
+#k=0.04
+#*********parameters of the Fast algorithm*********
+threshold=5;
+#nonmaxSuppression=true;
+#*********parameters of the grid feature algorithm*********
+#initFeatureScale=1f
+#featureScaleMul=0.1f
+#featureScaleLevels=1
+#initXyStep=10
+#initImgBound=0
+#varyXyStepWithScale=true
+#varyImgBoundWithScale=false
+
+#*********Terrain Controls for Matching*********
+terrainCtrlsPath=/Users/Kevin/Desktop/TJ_v2/tctrls.txt
