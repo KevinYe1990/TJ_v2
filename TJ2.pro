@@ -32,16 +32,18 @@ LIBS += -L/usr/local/lib                        \
         -lopencv_videostab                      \
         -lopencv_superres                       \
         -lopencv_nonfree                        \
+        -lgdal
+
 
 HEADERS += \
     core.h \
-    common.h\
     match.h \
-    delaunay.h
+    delaunay.h \
+    utils.h
 
 SOURCES += \
     main.cpp \
-    common.cpp \
+    utils.cpp \
     core.cpp \
     match.cpp \
     delaunay.cpp

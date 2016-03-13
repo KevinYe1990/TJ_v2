@@ -1,5 +1,5 @@
 #include "core.h"
-#include "common.h"
+//#include "utils.h"
 
 bool extractFeatures(char *type){
     Ptr<FeatureDetector> detector;
@@ -123,17 +123,18 @@ void performMatching(char *type)
     vector<Match> matches;
     readMatches(matchesToPassPath,matches);
     refineMatches(img1,img2,matches,matches,16,1,0.9);
-        printMatches("/home/kevin/Documents/win7share/output/aaa.txt",matches);
+    printMatches("/home/kevin/Documents/win7share/output/aaa.txt",matches);
 
-//    showMatches(img1,img2,terrainCtrls,imagescale);
+    printShpfile("/home/kevin/Documents/win7share/output/test.shp",matches,3031);
+    //    showMatches(img1,img2,terrainCtrls,imagescale);
 
-//    vector<KeyPoint> kpts;
-//    readKeyPoints(featuresPath,kpts);
-//    vector<Match> matches;
-//    matchUnderTerrainControl(img1,img2,terrainCtrls,kpts,matches,16,64,32,.9);
-//    cout<<matches.size()<<endl;
-//    ransacTest(matches,matches);
-//    cout<<matches.size()<<endl;
-//    showMatches(img1,img2,matches,imagescale);
-//    printMatches(terrainCtrlsPath,matches,1);
+    //    vector<KeyPoint> kpts;
+    //    readKeyPoints(featuresPath,kpts);
+    //    vector<Match> matches;
+    //    matchUnderTerrainControl(img1,img2,terrainCtrls,kpts,matches,16,64,32,.9);
+    //    cout<<matches.size()<<endl;
+    //    ransacTest(matches,matches);
+    //    cout<<matches.size()<<endl;
+    //    showMatches(img1,img2,matches,imagescale);
+    //    printMatches(terrainCtrlsPath,matches,1);
 }

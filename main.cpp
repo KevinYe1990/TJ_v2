@@ -1,4 +1,4 @@
-#include "common.h"
+#include "utils.h"
 #include "core.h"
 
 //#define _debug
@@ -55,22 +55,22 @@ return 0;
     while(--argc>0 && (*++argv)[0]=='-')
         while(c=*++argv[0])
             switch (c){
-            case 'm':
-            {//match
-                char *type=*++argv;
-                --argc;
-                if(strlen(type)==1)
-                    performMatching(type);
-                else
-                    exitwithErrors("unknown type for feature extraction!");
-                break;
-            }
             case 'f':
             {//feature types: 1)Good Feature; 2)Sift Feature; 3)Grid Feature;
                 char *type=*++argv;
                 --argc;
                 if(strlen(type)==1)
                     extractFeatures(type);
+                else
+                    exitwithErrors("unknown type for feature extraction!");
+                break;
+            }
+            case 'm':
+            {//match
+                char *type=*++argv;
+                --argc;
+                if(strlen(type)==1)
+                    performMatching(type);
                 else
                     exitwithErrors("unknown type for feature extraction!");
                 break;

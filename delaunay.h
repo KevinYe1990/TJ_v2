@@ -1,7 +1,7 @@
 #ifndef DELAUNAY
 #define DELAUNAY
 
-#include "common.h"
+#include "utils.h"
 
 class Delaunay:Subdiv2D{
 

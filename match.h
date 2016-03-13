@@ -1,7 +1,7 @@
 #ifndef MATCH
 #define MATCH
 
-#include "common.h"
+#include "utils.h"
 #include "delaunay.h"
 
 //old.match
