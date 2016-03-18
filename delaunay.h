@@ -12,7 +12,7 @@ class Delaunay:Subdiv2D{
     } vertex;
 
     typedef struct {
-        int id;//triangle index
+//        int id;//triangle index
 //        Point2f vertices[3];
 //        double attribute[3];
         vertex vtx[3];

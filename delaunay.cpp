@@ -36,7 +36,7 @@ bool Delaunay::iswithinTri(const Point2f &pt, int tri_id)
     triangle tri=triangulation[tri_id];
     vector<Point2f> contour;
     convert2Contour(tri,contour);
-    return pointPolygonTest(contour,pt,false);
+    return pointPolygonTest(contour,pt,false)==1;
 }
 
 
@@ -141,7 +141,7 @@ void Delaunay::getTriangulation(const vector<double> &attribute){
             triangulation.clear();
             int total = (int)(this->qedges.size()*4);
             vector<bool> edgemask(total, false);
-            int idx=0;
+//            int idx=0;
 
             for(int i = 4; i < total; i += 2 ){
                 if( edgemask[i] )
@@ -169,7 +169,7 @@ void Delaunay::getTriangulation(const vector<double> &attribute){
                 edgemask[edge] = true;
 
                 triangle tri;
-                tri.id=idx++;
+//                tri.id=idx++;
                 for(int k=0;k<3;++k){
                     vertex v;
                     v.id=k;

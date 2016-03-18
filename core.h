@@ -6,5 +6,7 @@
 bool extractFeatures(char *type);
 
 void performMatching(char *type);
+
+bool printConfigFile();
 #endif // _CORE
 

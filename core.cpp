@@ -16,7 +16,7 @@ bool extractFeatures(char *type){
     //set detector
     switch(type[0])
     {
-        case '1':
+        case GoodFeature:
         {//Good feature to track
             cout<<"Feature Extraction:\tGood feature to track..."<<endl<<endl;
             /*GoodFeaturesToTrackDetector( int maxCorners, double qualityLevel,
@@ -45,7 +45,7 @@ bool extractFeatures(char *type){
             }
             break;
         }
-        case '2':
+        case SiftFeature:
         {//Fast feature to track
             cout<<"Feature Extraction:\tFast feature to track..."<<endl<<endl;
             /*  FastFeatureDetector(int threshold=10,bool nonmaxSuppression=true)*/
@@ -68,7 +68,7 @@ bool extractFeatures(char *type){
             }
             break;
         }
-        case '3':
+        case GridFeature:
         {//Grid feature to track
             cout<<"Feature Extraction:\tGrid feature to track..."<<endl<<endl;
             /*DenseFeatureDetector(float initFeatureScale=1.f,int featureScaleLevels=1,float featureScaleMul=0.1f,
@@ -115,26 +115,82 @@ bool extractFeatures(char *type){
 
 void performMatching(char *type)
 {
-    string terrainCtrlsPath,featuresPath,matchesToPassPath;
-    readConfigFile(filename,"terrainCtrlsPath",terrainCtrlsPath);
-    readConfigFile(filename,"featuresPath",featuresPath);
-    readConfigFile(filename,"matchesToPassPath",matchesToPassPath);
-
+    int windowSize=16;
+    double corrThreshold=0.6,paraYRangeFrom=-1.0,paraYRangeTo=1.0;
+    bool displayMatches=false,saveMatchesAsTxt=false,saveMatchesAsShp;
     vector<Match> matches;
-    readMatches(matchesToPassPath,matches);
-    refineMatches(img1,img2,matches,matches,16,1,0.9);
-    printMatches("/home/kevin/Documents/win7share/output/aaa.txt",matches);
+    string matchesToPrintPath,matchesShpToPrintPath;
+    readConfigFile(filename,"windowSize",windowSize);
+    readConfigFile(filename,"corrThreshold",corrThreshold);
+    readConfigFile(filename,"paraYRangeFrom",paraYRangeFrom);
+    readConfigFile(filename,"paraYRangeTo",paraYRangeTo);
+    readConfigFile(filename,"displayMatches",displayMatches);
+    readConfigFile(filename,"saveMatchesAsTxt",saveMatchesAsTxt);
+    readConfigFile(filename,"saveMatchesAsShp",saveMatchesAsShp);
+    readConfigFile(filename,"matchesShpToPrintPath",matchesShpToPrintPath);
+    readConfigFile(filename,"matchesToPrintPath",matchesToPrintPath);
+    switch(type[0]){
+        case UnderTerrainControl:
+    {
+            string terrainCtrlsPath,featurePath;
+            int searchSize=24,torOfEpipolar=1;
+            readConfigFile(filename,"terrainCtrlsPath",terrainCtrlsPath);
+            readConfigFile(filename,"featurePath",featurePath);
+            readConfigFile(filename,"searchSize",searchSize);
+            readConfigFile(filename,"torOfEpipolar",torOfEpipolar);
 
-    printShpfile("/home/kevin/Documents/win7share/output/test.shp",matches,3031);
-    //    showMatches(img1,img2,terrainCtrls,imagescale);
+            vector<Match> terrain;
+            vector<KeyPoint> features;
+            readKeyPoints(featurePath,features);
+            readMatches(terrainCtrlsPath,terrain);
+            matchUnderTerrainControl(img1,img2,terrain,features,matches,
+                                     windowSize,searchSize,torOfEpipolar,0);
+            filterOut(matches,corrThreshold);
+            cout<<matches.size()<<endl;
+            filterOut(matches,paraYRangeFrom,paraYRangeTo,1);
+            cout<<matches.size()<<endl;
 
-    //    vector<KeyPoint> kpts;
-    //    readKeyPoints(featuresPath,kpts);
-    //    vector<Match> matches;
-    //    matchUnderTerrainControl(img1,img2,terrainCtrls,kpts,matches,16,64,32,.9);
-    //    cout<<matches.size()<<endl;
-    //    ransacTest(matches,matches);
-    //    cout<<matches.size()<<endl;
-    //    showMatches(img1,img2,matches,imagescale);
-    //    printMatches(terrainCtrlsPath,matches,1);
+            break;
+        }
+        case UnderGlacierControl:
+    {
+            break;
+        }
+        case RefineMatches:
+    {
+            string matchesToPassPath;
+            int torlerantOfX=1,torlerantOfY=1;
+            readConfigFile(filename,"matchesToPassPath",matchesToPassPath);
+            readConfigFile(filename,"torlerantOfX",torlerantOfX);
+            readConfigFile(filename,"torlerantOfY",torlerantOfY);
+            readMatches(matchesToPassPath,matches);
+            refineMatches(img1,img2,matches,matches,windowSize,
+                          torlerantOfX,corrThreshold,false,torlerantOfY);
+            filterOut(matches,paraYRangeFrom,paraYRangeTo,1);
+            break;
+        }
+        default:{
+            exitwithErrors("unknown type for matching!");
+        }
+    }
+
+    if(displayMatches)  showMatches(img1,img2,matches,imagescale);
+
+    if(saveMatchesAsTxt) printMatches(matchesToPrintPath,matches,0);
+    if(saveMatchesAsShp) printShpfile(matchesShpToPrintPath,matches);
+}
+
+
+
+bool printConfigFile(){
+    ifstream in(filename);
+    if(!in.is_open()) exitwithErrors("Error occured while opening the configuration file!");
+    while(!in.eof()){
+        string line;
+        getline(in,line,'\n');
+        if(line[0]!='#')
+            cout<<line<<endl;
+    }
+    in.close();
+    return 0;
 }

@@ -33,6 +33,9 @@ extern char *filename;
 extern string directory;
 extern double imagescale;
 
+enum MATCH_TYPE{UnderTerrainControl='1',UnderGlacierControl='2',RefineMatches='3'};
+enum FEATURE_TYPE{GoodFeature='1',SiftFeature='2',GridFeature='3'};
+
 struct Match{
     Match(){}
     Match(Point2f p1,Point2f p2):p1(p1),p2(p2),windowSize(0),corr(0),angle(0),speed(0){}

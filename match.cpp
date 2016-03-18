@@ -55,11 +55,11 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
     matches.clear();
     assert(windowSize%2==0);
     assert(searchSize%2==0);
+    int shift=1;
     int windowRadius=(windowSize/2);
     int searchRadius=(searchSize/2);
     Delaunay tri(leftImg);
     tri.generateDelaunay(matches4Ctrls);
-
     //traversing the triangulation
     int n=tri.getNumberOfTri();
     vector<bool> featureMask(features.size(),true);
@@ -77,13 +77,14 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
                     PointOfLeftImg=Point2i(floor(feature.x-windowRadius),floor(feature.y-windowRadius));
                     //************************NOTE:***********************
                     //one pixel shift
-                    PointOfRightImg=Point2i(floor(feature.x-disparity-searchRadius),
-                                            floor(feature.y-torOfEpipolar-windowRadius));
+                    PointOfRightImg=Point2i(floor(feature.x-disparity-searchRadius-shift),
+                                            floor(feature.y-torOfEpipolar-windowRadius-shift));
                     //*****************************************************
                     //check if the range is beyond the range of the left image
                     Rect templateRange(PointOfLeftImg,Size(windowRadius*2,windowRadius*2));
                     //enlarge by one+one pixel
-                    Rect searchRange(PointOfRightImg,Size((searchRadius)*2,(torOfEpipolar+windowRadius)*2));
+                    Rect searchRange(PointOfRightImg,Size((searchRadius+shift)*2,
+                                                          (torOfEpipolar+windowRadius+shift)*2));
                     if(checkSize(leftImg,templateRange) && checkSize(rightImg,searchRange)){
                         //crop the patches
                         Mat templ=leftImg(templateRange);
@@ -204,16 +205,34 @@ void refineMatches(const Mat& leftImg, const Mat& rightImg,const vector<Match>& 
 }
 
 
+void filterOut(vector<Match>& matches, double from, double to, int mode)
+{
+    assert(from <= to);
+    vector<Match>::iterator iter=matches.begin();
+    while(iter!=matches.end()){
+        double para;
+        if(mode==0)
+            para=iter->getParaX();
+        else if(mode==1)
+            para=iter->getParaY();
+
+        if(para<from || para>to)
+            //out of range
+            iter=matches.erase(iter);
+        else
+            ++iter;
+    }
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
+void filterOut(vector<Match>& matches, double mcc)
+{
+    assert(matches.size()>0);
+    vector<Match>::iterator iter=matches.begin();
+    while(iter!=matches.end()){
+    if(iter->corr<mcc)
+        iter=matches.erase(iter);
+    else
+        ++iter;
+    }
+}

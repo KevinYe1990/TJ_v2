@@ -11,7 +11,6 @@ char *filename;
 Mat img1,img2;
 int c/*,except=0,number=0,found=0*/;
 
-static bool printConfigFile();
 void getDirectory(string &str);
 
 void help(){
@@ -66,7 +65,7 @@ return 0;
                 break;
             }
             case 'm':
-            {//match
+            {//refine-match,delaunay-match-terrain,delaunay-match-glacier
                 char *type=*++argv;
                 --argc;
                 if(strlen(type)==1)
@@ -87,13 +86,6 @@ return 0;
     return 0;
 }
 
-static bool printConfigFile(){
-    cout<<"Configuration File Content:"<<endl;
-    cout<<"First Image Path:\t"<<img1Path<<endl;
-    cout<<"Second Image Path:\t"<<img2Path<<endl;
-    cout<<endl;
-    return 0;
-}
 
 void getDirectory(string &str){
 int _max_length=1000;

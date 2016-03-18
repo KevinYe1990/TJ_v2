@@ -1,8 +1,8 @@
 #**************************CONFIGURATION FOR TJ TO RUN************************
 #============================================================================#
 ###paths of image pair
-img1Path=/home/kevin/Documents/win7share/9058_l5_en.tif
-img2Path=/home/kevin/Documents/win7share/9059_l5.tif
+img1Path=/home/kevin/Documents/win7share/l5_9058.tif
+img2Path=/home/kevin/Documents/win7share/l5_9059.tif
 DisplayScale=1
 
 ###feature type:1)good feature; 2)fast feature; 3)grid feature
@@ -11,10 +11,10 @@ DisplayKeypoints=true
 SaveKeypoints=true
 SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
 #*********parameters of the good feature algorithm*********
-maxCorners=100000000000
+maxCorners=2000
 qualityLevel=0.01
-minDistance=5
-blockSize=5
+#minDistance=5
+blockSize=50
 #useHarrisDetector=false
 #k=0.04
 #*********parameters of the Fast algorithm*********
@@ -24,32 +24,12 @@ threshold=50;
 #initFeatureScale=1f
 #featureScaleMul=0.1f
 #featureScaleLevels=1
-initXyStep=5
+initXyStep=50
 #initImgBound=0
 #varyXyStepWithScale=true
 #varyImgBoundWithScale=false
 
-#******************Matching******************
-###Matching type:
-#					1)Match under terrain constraints; 
-#					2)Match under glacier constraints;
-#					3)Refine previous matching results
-
-featurePath=/home/kevin/Documents/win7share/exp/l1_features.txt
-matchesToPrintPath=/home/kevin/Documents/win7share/exp/matches.txt
-matchesShpToPrintPath=/home/kevin/Documents/win7share/exp/correspondences.shp
-windowSize=16
-corrThreshold=0.6
-paraYRangeFrom=-.35
-paraYRangeTo=.35
-displayMatches=true
-saveMatchesAsTxt=true
-saveMatchesAsShp=false
 #*********Terrain Controls for Matching*********
-terrainCtrlsPath=/home/kevin/Documents/win7share/exp/initial_GCPs.txt
-searchSize=24
-torOfEpipolar=1
-#*********refine correspondence candidates*********
+#terrainCtrlsPath=/home/kevin/Desktop/TJ_v2/tctrls.txt
+#featuresPath=/home/kevin/Documents/win7share/keypoints.txt
 matchesToPassPath=/home/kevin/Documents/win7share/features/refine.txt
-torlerantOfX=1
-torlerantOfY=1

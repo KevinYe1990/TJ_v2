@@ -30,6 +30,8 @@ void showMatches(const Mat& refImg,const Mat& schImg,const vector<Match> matches
     drawMatches(refImg,leftkpts,schImg,rightkpts,dmatches,tmp);
     resize(tmp,tmp,cv::Size(tmp.cols*scale,tmp.rows*scale));
 
+    cout<<matches.size()<<" correspondences were matched..."<<endl;
+
     imshow("Matching Result.",tmp);
     waitKey(0);
 }
@@ -101,9 +103,11 @@ void printMatches(string filename,const vector<Match>& matches,int mode){
     switch(mode){
     case 0:
         out.open(filename,ios::out);
+        out<<"F1\tF2\tF3\tF4\tMCC\tWindowSize\tPoint1_x\tPoint1_y\tPoint2_x\tPoint2_y\tParaX\tParaY"<<endl;
         break;
     case 1:
         out.open(filename,ios::app);
+        out<<endl;
         break;
     default:
         exitwithErrors("Error occured while writing matching results!");
@@ -112,17 +116,16 @@ void printMatches(string filename,const vector<Match>& matches,int mode){
     if(out.is_open()){
         vector<Match>::const_iterator iter;
         for(iter=matches.begin();iter!=matches.end();++iter){
-            if(iter==matches.begin())
-                out<<endl;
-            if(iter==matches.end()-1)
-                out<<(*iter).p1.x<<"\t"<<(*iter).p1.y<<"\t"<<(*iter).p2.x<<"\t"<<(*iter).p2.y;
-            else
-                out<<(*iter).p1.x<<"\t"<<(*iter).p1.y<<"\t"<<(*iter).p2.x<<"\t"<<(*iter).p2.y<<endl;
+            out<<iter->p1.x<<"\t"<<iter->p1.y<<"\t"<<iter->p2.x<<"\t"<<iter->p2.y<<"\t"<<iter->corr<<"\t"<<iter->windowSize<<"\t"
+              <<iter->p1.x-.5<<"\t"<<-iter->p1.y+.5<<"\t"<<iter->p2.x-.5<<"\t"<<-iter->p2.y+.5<<"\t"
+              <<iter->p1.x-iter->p2.x<<"\t"<<iter->p1.y-iter->p2.y;
+            if(iter!=matches.end()-1) out<<endl;
         }
         out.close();
     }else
         exitwithErrors("Unable to open the output file!");
 
+    cout<<matches.size()<<" correspondences were printed..."<<endl;
 }
 
 void showKeypoints(const Mat img,const vector<KeyPoint> &kpts,double scale){
@@ -402,8 +405,8 @@ void printShpfile(string shpname,const vector<Point2f>& pointSet,int EPSG)
         //    poLine->setPoint(1,100.0,150.0, 0.0);
 
         OGRPoint *point=new OGRPoint();
-        point->setX(pointSet[i].x);
-        point->setY(pointSet[i].y);
+        point->setX(pointSet[i].x-.5);
+        point->setY(-pointSet[i].y+.5);
 
         poFeature->SetGeometry(point);
         if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
@@ -533,8 +536,8 @@ void printShpfile(string shpname, const vector<Match> &matches, int EPSG)
         //    poLine->setPoint(1,100.0,150.0, 0.0);
 
         OGRPoint *point=new OGRPoint();
-        point->setX(matches[i].p1.x);
-        point->setY(matches[i].p1.y);
+        point->setX(matches[i].p1.x-.5);
+        point->setY(-matches[i].p1.y+.5);
         poFeature->SetGeometry(point);
 
         if( poLayer->CreateFeature( poFeature ) != OGRERR_NONE )
