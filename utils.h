@@ -10,9 +10,17 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdarg.h>
-
+//OpenMP
+#include <omp.h>
 //Eigen 3.2.8
 #include "Eigen/Dense"
+//PCL 1.8
+#include "pcl/point_types.h"
+#include "pcl/io/pcd_io.h"
+#include "pcl/kdtree/kdtree_flann.h"
+#include "pcl/search/kdtree.h"
+#include "pcl/kdtree/impl/kdtree_flann.hpp"
+#include "pcl/surface/mls.h"
 //OpenCV 2.4.9
 #include "opencv2/opencv.hpp"
 #include "opencv2/nonfree/features2d.hpp"
@@ -69,7 +77,8 @@ bool readConfigFile(const char *cfgfilepath, const string &key, double &value);
 bool readConfigFile(const char *cfgfilepath, const string &key, float &value);
 bool readConfigFile(const char *cfgfilepath, const string &key, bool &value);
 void readKeyPoints(const string filename,vector<cv::KeyPoint>& kpts);
-void readMatches(const string filename,vector<Match>& matches,int withCC=false, int withWindowSize=false);
+void readMatches(const string filename,vector<Match>& matches,bool withTitle=false,bool withCC=false, bool withWindowSize=false,
+                 bool withArcgisCoor=false,bool withParaXY=false);
 
 void showImage(Mat &img,string title="TEST",double scale=1);
 void showKeypoints(const Mat img,const vector<KeyPoint> &kpts,double scale=1);

@@ -1,7 +1,7 @@
 #**************************CONFIGURATION FOR TJ TO RUN************************
 #============================================================================#
 ###paths of image pair
-img1Path=/home/kevin/Documents/win7share/9058_l5_en.tif
+img1Path=/home/kevin/Documents/win7share/9058_l5.tif
 img2Path=/home/kevin/Documents/win7share/9059_l5.tif
 DisplayScale=1
 
@@ -38,8 +38,10 @@ initXyStep=5
 featurePath=/home/kevin/Documents/win7share/exp/l1_features.txt
 matchesToPrintPath=/home/kevin/Documents/win7share/exp/matches.txt
 matchesShpToPrintPath=/home/kevin/Documents/win7share/exp/correspondences.shp
+PATH_OF_STAGE1=/home/kevin/Documents/win7share/tmp/stage1.txt
+PATH_OF_STAGE2=/home/kevin/Documents/win7share/tmp/stage2.txt
 windowSize=16
-corrThreshold=0.6
+corrThreshold=0.66
 paraYRangeFrom=-.35
 paraYRangeTo=.35
 displayMatches=true
@@ -47,9 +49,14 @@ saveMatchesAsTxt=true
 saveMatchesAsShp=false
 #*********Terrain Controls for Matching*********
 terrainCtrlsPath=/home/kevin/Documents/win7share/exp/initial_GCPs.txt
-searchSize=24
+searchSize=22
 torOfEpipolar=1
 #*********refine correspondence candidates*********
 matchesToPassPath=/home/kevin/Documents/win7share/features/refine.txt
 torlerantOfX=1
 torlerantOfY=1
+
+#******************Surface Fitting******************
+#format of point cloud:      x     y     z
+pointCloudInPath=/home/kevin/Documents/win7share/exp/in.txt
+pointCloudOutPath=/home/kevin/Documents/win7share/exp/out.txt

@@ -74,6 +74,16 @@ return 0;
                     exitwithErrors("unknown type for feature extraction!");
                 break;
             }
+            case 's':
+            {//surface fitting to remote outliers
+                char *type=*++argv;
+                --argc;
+                if(strlen(type)==1)
+                    surfaceFitting(type);
+                else
+                    exitwithErrors("unknown type for surface fitting!");
+                break;
+            }
             case 'p':
             {
                 printConfigFile();
@@ -88,9 +98,9 @@ return 0;
 
 
 void getDirectory(string &str){
-int _max_length=1000;
-char path[1000];
-getcwd(path,_max_length);
-str=string(path);
-    str.append("/");
+    int _max_length=1000;
+    char path[1000];
+    getcwd(path,_max_length);
+    str=string(path);
+        str.append("/");
 }

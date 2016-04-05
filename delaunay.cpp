@@ -36,7 +36,7 @@ bool Delaunay::iswithinTri(const Point2f &pt, int tri_id)
     triangle tri=triangulation[tri_id];
     vector<Point2f> contour;
     convert2Contour(tri,contour);
-    return pointPolygonTest(contour,pt,false)==1;
+    return pointPolygonTest(contour,pt,false)>0;
 }
 
 

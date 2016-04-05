@@ -236,3 +236,40 @@ void filterOut(vector<Match>& matches, double mcc)
         ++iter;
     }
 }
+
+void updateTmpMatches(const vector<Match> &tmatches,string file)
+{
+    vector<Match> matches,ori_matches,dif_matches;
+    matches=tmatches;
+    //assert the file exits??????????
+    readMatches(file,ori_matches,true,true,true,true,true);
+    if(ori_matches.size()==0)
+        printMatches(file,matches,0);
+    else{
+        sort(matches.begin(),matches.end(),compMatches);
+        sort(ori_matches.begin(),ori_matches.end(),compMatches);
+        set_difference(matches.begin(),matches.end(),
+                       ori_matches.begin(),ori_matches.end(),
+                        back_inserter(dif_matches),compMatches);
+        if(ori_matches.size()==1)
+            printMatches(file,dif_matches,0);
+        else
+            printMatches(file,dif_matches,1);
+    }
+}
+
+
+bool compMatches(const Match &m1, const Match &m2)
+{
+    if (m1.p1.x < m2.p1.x){
+        return true;
+    }
+    else if (m1.p1.x > m2.p1.x)
+        return false;
+    else{
+        if (m1.p1.y < m2.p1.y)
+            return true;
+        else
+            return false;
+    }
+}

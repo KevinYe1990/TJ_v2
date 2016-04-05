@@ -99,6 +99,7 @@ void showImage(Mat &img,string title,double scale){
 }
 
 void printMatches(string filename,const vector<Match>& matches,int mode){
+    if(matches.size()==0) return;
     ofstream out;
     switch(mode){
     case 0:
@@ -124,7 +125,6 @@ void printMatches(string filename,const vector<Match>& matches,int mode){
         out.close();
     }else
         exitwithErrors("Unable to open the output file!");
-
     cout<<matches.size()<<" correspondences were printed..."<<endl;
 }
 
@@ -219,7 +219,7 @@ bool readConfigFile(const char *cfgfilepath, const string &key, bool &value){
     return b;
 }
 
-void readMatches(const string filename, vector<Match> &matches, int withCC, int withWindowSize)
+void readMatches(const string filename, vector<Match> &matches, bool withTitle,bool withCC, bool withWindowSize,bool withArcgisCoor,bool withParaXY)
 {
     matches.clear();
     ifstream in;
@@ -230,19 +230,34 @@ void readMatches(const string filename, vector<Match> &matches, int withCC, int 
         while(!in.eof()){
             Point2f pt1,pt2;
             Match match;
-            if(withCC){
-                double cc;
-                in>>pt1.x>>pt1.y>>pt2.x>>pt2.y>>cc;
-                match.corr=cc;
-            }else
-                in>>pt1.x>>pt1.y>>pt2.x>>pt2.y;
 
+            if(withTitle){
+                string tmp;
+                getline(in,tmp);
+            }
+
+            in>>pt1.x>>pt1.y>>pt2.x>>pt2.y;
             match.p1=pt1;
             match.p2=pt2;
+
+            if(withCC){
+                double cc;
+                in>>cc;
+                match.corr=cc;
+            }
+
             if(withWindowSize){
                 int ww;
                 in>>ww;
                 match.windowSize=ww;
+            }
+            if(withArcgisCoor){
+                double tmpd;
+                in>>tmpd>>tmpd>>tmpd>>tmpd;
+            }
+            if(withParaXY){
+                double paraX,paraY;
+                in>>paraX>>paraY;
             }
             matches.push_back(match);
         }

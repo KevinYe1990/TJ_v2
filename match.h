@@ -22,6 +22,10 @@ Mat ransacTest(const vector<Match> &src, vector<Match> &dst,int method=CV_FM_RAN
 
 bool surfaceFitting();
 
+bool compMatches(const Match& m1, const Match& m2);
+
+void updateTmpMatches(const vector<Match>& tmatches,string file=filename);
+
 void filterOut(vector<Match>& matches,double from,double to,int mode=1);
 void filterOut(vector<Match>& matches,double mcc);
 #endif // MATCH

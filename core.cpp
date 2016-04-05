@@ -1,6 +1,6 @@
 #include "core.h"
 //#include "utils.h"
-
+#include "mls_overlap.hpp"
 bool extractFeatures(char *type){
     Ptr<FeatureDetector> detector;
     vector<KeyPoint> keypoints;
@@ -119,7 +119,7 @@ void performMatching(char *type)
     double corrThreshold=0.6,paraYRangeFrom=-1.0,paraYRangeTo=1.0;
     bool displayMatches=false,saveMatchesAsTxt=false,saveMatchesAsShp;
     vector<Match> matches;
-    string matchesToPrintPath,matchesShpToPrintPath;
+    string matchesToPrintPath,matchesShpToPrintPath,PATH_OF_STAGE1,PATH_OF_STAGE2;
     readConfigFile(filename,"windowSize",windowSize);
     readConfigFile(filename,"corrThreshold",corrThreshold);
     readConfigFile(filename,"paraYRangeFrom",paraYRangeFrom);
@@ -129,6 +129,9 @@ void performMatching(char *type)
     readConfigFile(filename,"saveMatchesAsShp",saveMatchesAsShp);
     readConfigFile(filename,"matchesShpToPrintPath",matchesShpToPrintPath);
     readConfigFile(filename,"matchesToPrintPath",matchesToPrintPath);
+    readConfigFile(filename,"PATH_OF_STAGE1",PATH_OF_STAGE1);
+    readConfigFile(filename,"PATH_OF_STAGE2",PATH_OF_STAGE2);
+
     switch(type[0]){
         case UnderTerrainControl:
     {
@@ -146,10 +149,11 @@ void performMatching(char *type)
             matchUnderTerrainControl(img1,img2,terrain,features,matches,
                                      windowSize,searchSize,torOfEpipolar,0);
             filterOut(matches,corrThreshold);
-            cout<<matches.size()<<endl;
+            cout<<"Update the stage 1 file..."<<endl;
+            updateTmpMatches(matches,PATH_OF_STAGE1);
             filterOut(matches,paraYRangeFrom,paraYRangeTo,1);
-            cout<<matches.size()<<endl;
-
+            cout<<"Update the stage 2 file..."<<endl;
+            updateTmpMatches(matches,PATH_OF_STAGE2);
             break;
         }
         case UnderGlacierControl:
@@ -193,4 +197,54 @@ bool printConfigFile(){
     }
     in.close();
     return 0;
+}
+
+
+void surfaceFitting(char *type)
+{
+    string pointCloudInPath,pointCloudOutPath;
+    readConfigFile(filename,"pointCloudInPath",pointCloudInPath);
+    readConfigFile(filename,"pointCloudOutPath",pointCloudOutPath);
+    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
+    ifstream in(pointCloudInPath);
+    vector<int> state;
+    int sum=0;
+    if(in.is_open()){
+        while(!in.eof()){
+            pcl::PointXYZ pt;
+            int sta;
+            in>>pt.x>>pt.y>>pt.z>>sta;
+            cloud->points.push_back(pt);
+            state.push_back(sta);
+            sum+=sta;
+        }
+    }else
+        exitwithErrors("Errors occured while opening the point cloud file");
+    in.close();
+    cout<<state.size()<<" points inputed and "<<state.size()-sum<<" control points involved..."<<endl;
+
+    pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
+    pcl::PointCloud<pcl::PointNormal> mls_points;
+    pcl::MLS_OMP<pcl::PointXYZ,pcl::PointNormal> mls;
+    //set parameters
+    double searchRadius=25;
+    int order=std::atoi(type);
+    mls.setPolynomialFit(true);
+    mls.setPolynomialOrder(order);
+    mls.setSearchMethod(kdtree);
+    mls.setSearchRadius(searchRadius);
+    mls.setComputeNormals(true);
+    mls.setSqrGaussParam(searchRadius*searchRadius);
+    mls.setInputCloud(cloud);
+    mls.setNumberOfThreads(16);
+    //reconstruct
+    mls.process(mls_points);
+
+    //recover deleted control points
+    pcl::PointIndicesPtr crpd=mls.getCorrespondingIndices();
+    mls.sear
+
+    //save output
+    pcl::io::savePCDFileASCII(pointCloudOutPath,mls_points);
+
 }
