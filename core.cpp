@@ -113,6 +113,7 @@ bool extractFeatures(char *type){
     }
 }
 
+
 void performMatching(char *type)
 {
     int windowSize=16;
@@ -185,7 +186,6 @@ void performMatching(char *type)
 }
 
 
-
 bool printConfigFile(){
     ifstream in(filename);
     if(!in.is_open()) exitwithErrors("Error occured while opening the configuration file!");
@@ -203,12 +203,15 @@ bool printConfigFile(){
 void surfaceFitting(char *type)
 {
     string pointCloudInPath,pointCloudOutPath;
+    int SFSearchRadius=25;
     readConfigFile(filename,"pointCloudInPath",pointCloudInPath);
     readConfigFile(filename,"pointCloudOutPath",pointCloudOutPath);
+    readConfigFile(filename,"SFSearchRadius",SFSearchRadius);
+
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
     ifstream in(pointCloudInPath);
     vector<int> state;
-    int sum=0;
+    int sum=0;//number of candidates
     if(in.is_open()){
         while(!in.eof()){
             pcl::PointXYZ pt;
@@ -225,9 +228,9 @@ void surfaceFitting(char *type)
 
     pcl::search::KdTree<pcl::PointXYZ>::Ptr kdtree(new pcl::search::KdTree<pcl::PointXYZ>);
     pcl::PointCloud<pcl::PointNormal> mls_points;
-    pcl::MLS_OMP<pcl::PointXYZ,pcl::PointNormal> mls;
+    pcl::MovingLeastSquaresOMP<pcl::PointXYZ,pcl::PointNormal> mls;
     //set parameters
-    double searchRadius=25;
+    double searchRadius=SFSearchRadius;
     int order=std::atoi(type);
     mls.setPolynomialFit(true);
     mls.setPolynomialOrder(order);
@@ -240,11 +243,73 @@ void surfaceFitting(char *type)
     //reconstruct
     mls.process(mls_points);
 
-    //recover deleted control points
+    //eliminate points with parallax difference over N times sigma
+    pcl::PointCloud<pcl::PointXYZ>::Ptr diff(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::PointIndicesPtr crpd=mls.getCorrespondingIndices();
-    mls.sear
+    for(int i=0;i!=crpd->indices.size();++i){
+        pcl::PointXYZ point;
+        point.x=cloud->points[crpd->indices[i]].x;
+        point.y=cloud->points[crpd->indices[i]].y;
+        point.z=cloud->points[crpd->indices[i]].z-mls_points.points[i].z;
+        diff->points.push_back(point);
+    }
+    pcl::MLS_OMP<pcl::PointXYZ,pcl::PointXYZ> mls_;
+    mls_.setSearchMethod(kdtree);
+    mls_.setSearchRadius(searchRadius);
+    mls_.setInputCloud(diff);
+    mls_.setNumberOfThreads(16);
 
-    //save output
-    pcl::io::savePCDFileASCII(pointCloudOutPath,mls_points);
+    //for all points
+    for(int i=0;i!=diff->points.size();++i){
+        //check if the point is a control point
+        if(state[crpd->indices[i]]==0)
+            continue;
+        //find nearest points
+        std::vector<int> indices_;
+        std::vector<float> dist_;
+        mls_.new_searchForNeighbors(i,indices_,dist_);
+        //calculate mean and standard deviation of the local points
+        std::vector<double> neighbors;
+        double avg_neighbors,stdv_neighbors;
+        for(int k=0;k!=indices_.size();++k)
+            neighbors.push_back(diff->points[indices_[k]].z);
+        get_avg_stdv(neighbors,avg_neighbors,stdv_neighbors);
+        double lt=avg_neighbors+3.*stdv_neighbors;
+        double gt=avg_neighbors-3.*stdv_neighbors;
+        if((diff->points[i].z)>=gt && (diff->points[i].z)<=lt)
+            state[crpd->indices[i]]=0;
+    }
 
+    //generate final result
+    ofstream out(pointCloudOutPath);
+    if(out.is_open()){
+    for(int i=0;i!=cloud->points.size();++i)
+        if(state[i]==0){
+            out<<cloud->points[i].x<<"\t"<<cloud->points[i].y<<"\t"<<cloud->points[i].z;
+            if(i!=cloud->points.size()-1)
+                out<<endl;
+        }
+    }
+    out.close();
+}
+
+
+void getIdentityMatches()
+{
+    string InMatchPath1,InMatchPath2/*,OutMatchPath*/;
+    readConfigFile(filename,"InMatchPath1",InMatchPath1);
+    readConfigFile(filename,"InMatchPath2",InMatchPath2);
+//    readConfigFile(filename,"OutMatchPath",OutMatchPath);
+
+    std::vector<Match> matches1,matches2,diff;
+    readMatches(InMatchPath1,matches1);
+    readMatches(InMatchPath2,matches2);
+//    readMatches(OutMatchPath,diff);
+
+    findIdentity(matches1,matches2,diff);
+    size_t pos;
+    pos=InMatchPath1.find_last_of('.');
+    std::string comment="cp "+InMatchPath1+" "+InMatchPath1.substr(0,pos)+"_backup.txt";
+    system(comment.c_str());
+    printShortMatches(InMatchPath1,diff);
 }

@@ -563,3 +563,76 @@ void printShpfile(string shpname, const vector<Match> &matches, int EPSG)
     OGRDataSource::DestroyDataSource( poDS );
     OGRCleanupAll();
 }
+
+
+void get_avg_stdv(const vector<double> &data, double &avg, double &stdv)
+{
+    int n=data.size();
+    //get avg
+    avg=0.0;
+    for(int i=0;i!=n;++i)
+        avg+=data[i];
+    avg=avg/n;
+    //get variance
+    double var=0;
+    for(int i=0;i!=n;++i)
+        var+=(data[i]-avg)*(data[i]-avg);
+    var=var/(n-1);
+    //get stdv
+    stdv=sqrt(var);
+}
+
+
+void findIdentity(const vector<Match> &in_matches1, const vector<Match> &in_matches2, vector<Match> &diff)
+{
+    int n = in_matches1.size();
+    int m = in_matches2.size();
+    diff.clear();
+
+    std::vector<Match> m1,m2;
+    m1=in_matches1;
+    m2=in_matches2;
+
+    std::sort(m1.begin(),m1.end());
+    std::sort(m2.begin(),m2.end());
+    std::set_difference(
+        m1.begin(), m1.end(),
+        m2.begin(), m2.end(),
+        std::back_inserter(diff));
+
+    std::printf("The total number of the Candidates is: %d.\n"
+                "The number of the Matched ones is: %d.\n"
+                "The number of left is: %d\n",
+        n, m, diff.size());
+}
+
+
+void printShortMatches(string filename, const vector<Match> &matches, int mode)
+{
+    if(matches.size()==0) return;
+    ofstream out;
+    switch(mode){
+    case 0:
+        out.open(filename,ios::out);
+//        out<<"F1\tF2\tF3\tF4\tMCC\tWindowSize\tPoint1_x\tPoint1_y\tPoint2_x\tPoint2_y\tParaX\tParaY"<<endl;
+        break;
+    case 1:
+        out.open(filename,ios::app);
+        out<<endl;
+        break;
+    default:
+        exitwithErrors("Error occured while writing matching results!");
+    }
+
+    if(out.is_open()){
+        vector<Match>::const_iterator iter;
+        for(iter=matches.begin();iter!=matches.end();++iter){
+            out<<iter->p1.x<<"\t"<<iter->p1.y<<"\t"<<iter->p2.x<<"\t"<<iter->p2.y;
+            if(iter!=matches.end()-1)
+                out<<std::endl;
+        }
+        out.close();
+    }else
+        exitwithErrors("Unable to open the output file!");
+    cout<<matches.size()<<" correspondences were printed..."<<endl;
+}

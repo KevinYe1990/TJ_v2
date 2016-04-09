@@ -9,6 +9,8 @@ void performMatching(char *type);
 
 void surfaceFitting(char *type);
 
+void getIdentityMatches();
+
 bool printConfigFile();
 #endif // _CORE
 

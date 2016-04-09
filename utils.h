@@ -6,6 +6,9 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <math.h>
+#include <vector>
+#include <stdlib.h>
 //#include <typeindex>
 #include <unistd.h>
 #include <time.h>
@@ -47,14 +50,38 @@ enum FEATURE_TYPE{GoodFeature='1',SiftFeature='2',GridFeature='3'};
 struct Match{
     Match(){}
     Match(Point2f p1,Point2f p2):p1(p1),p2(p2),windowSize(0),corr(0),angle(0),speed(0){}
-    double getParaX(){return (double)(p1.x-p2.x);}
-    double getParaY(){return (double)(p1.y-p2.y);}
+    double getParaX() const {return (double)(p1.x-p2.x);}
+    double getParaY() const {return (double)(p1.y-p2.y);}
     cv::Point2f p1;
     cv::Point2f p2;
     int windowSize;
     double corr;
     double angle;
     double speed;
+
+    bool operator==(const Match& m) const {
+        if(p1.x==m.p1.x && p1.y==m.p1.y)
+            return true;
+        return false;
+    }
+    bool operator<(const Match &m) const {
+        if(p1.x<m.p1.x){
+            return true;
+        }
+        else if(p1.x==m.p1.x && p1.y<m.p1.y){
+            return true;
+        }
+        return false;
+    }
+    bool operator>(const Match &m) const {
+        if(p1.x>m.p1.x){
+            return true;
+        }
+        else if(p1.x==m.p1.x && p1.y>m.p1.y){
+            return true;
+        }
+        return false;
+    }
 };
 
 bool exitwithErrors(const char *msg);
@@ -62,10 +89,11 @@ void lowerString(string &str);
 void trimString(string &str);
 bool str2bool(string s);
 void findIdentity(vector<KeyPoint> keypts, vector<Match> matches, vector<KeyPoint>& left);
+void findIdentity(const vector<Match>& in_matches1,const vector<Match>& in_matches2,vector<Match>& diff);
 bool compKeyPoints(const cv::KeyPoint& rhs, const cv::KeyPoint& lhs);
 void polyfit(const vector<double> xv,const vector<double> yv,vector<double> &coeff,int order=2);
 void fit2ndPolynomial(const Mat &cc_Mat, double &x, double &y);
-
+void get_avg_stdv(const vector<double>& data,double& avg,double& stdv);
 void KeyPoint2Point2f(const vector<KeyPoint>& src, vector<Point2f>& dst);
 void Point2f2KeyPoint(const vector<Point2f>& src, vector<KeyPoint>& dst);
 void Match2DMatch(const vector<Match>& src,vector<DMatch>& dst,
@@ -86,6 +114,7 @@ void showMatches(const Mat& leftImg,const Mat& rightImg,const vector<Match> matc
 
 void printKeypoints(std::string filename,const std::vector<cv::KeyPoint>& kpts);
 void printMatches(string filename,const vector<Match>& matches,int mode=0);
+void printShortMatches(string filename,const vector<Match>& matches,int mode=0);
 
 void getPtsFromMatches(const vector<Match>& matches,vector<Point2f>& lpts,vector<Point2f>& rpts);
 void printShpfile(string shpname,const vector<Point2f>& pointSet,int EPSG=0);

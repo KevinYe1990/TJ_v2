@@ -84,6 +84,11 @@ return 0;
                     exitwithErrors("unknown type for surface fitting!");
                 break;
             }
+            case 'i':
+            {//find the difference match dataset
+                getIdentityMatches();
+                break;
+            }
             case 'p':
             {
                 printConfigFile();

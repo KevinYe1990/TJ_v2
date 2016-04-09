@@ -1,8 +1,8 @@
 #**************************CONFIGURATION FOR TJ TO RUN************************
 #============================================================================#
 ###paths of image pair
-img1Path=/home/kevin/Documents/win7share/9058_l5.tif
-img2Path=/home/kevin/Documents/win7share/9059_l5.tif
+img1Path=/home/kevin/Documents/win7share/9058_l3.tif
+img2Path=/home/kevin/Documents/win7share/9059_l3.tif
 DisplayScale=1
 
 ###feature type:1)good feature; 2)fast feature; 3)grid feature
@@ -12,9 +12,9 @@ SaveKeypoints=true
 SaveKeypointsPath=/home/kevin/Documents/win7share/keypoints.txt
 #*********parameters of the good feature algorithm*********
 maxCorners=100000000000
-qualityLevel=0.01
+qualityLevel=0.0001
 minDistance=5
-blockSize=5
+blockSize=10
 #useHarrisDetector=false
 #k=0.04
 #*********parameters of the Fast algorithm*********
@@ -35,28 +35,35 @@ initXyStep=5
 #					2)Match under glacier constraints;
 #					3)Refine previous matching results
 
-featurePath=/home/kevin/Documents/win7share/exp/l1_features.txt
+featurePath=/home/kevin/Documents/win7share/exp/l2_features.txt
 matchesToPrintPath=/home/kevin/Documents/win7share/exp/matches.txt
 matchesShpToPrintPath=/home/kevin/Documents/win7share/exp/correspondences.shp
-PATH_OF_STAGE1=/home/kevin/Documents/win7share/tmp/stage1.txt
-PATH_OF_STAGE2=/home/kevin/Documents/win7share/tmp/stage2.txt
+PATH_OF_STAGE1=/home/kevin/Documents/win7share/exp/stage1.txt
+PATH_OF_STAGE2=/home/kevin/Documents/win7share/exp/stage2.txt
 windowSize=16
-corrThreshold=0.66
-paraYRangeFrom=-.35
-paraYRangeTo=.35
+corrThreshold=0.4
+paraYRangeFrom=-1
+paraYRangeTo=1
 displayMatches=true
 saveMatchesAsTxt=true
 saveMatchesAsShp=false
 #*********Terrain Controls for Matching*********
-terrainCtrlsPath=/home/kevin/Documents/win7share/exp/initial_GCPs.txt
-searchSize=22
+terrainCtrlsPath=/home/kevin/Documents/win7share/exp/l2c2.txt
+searchSize=52
 torOfEpipolar=1
 #*********refine correspondence candidates*********
-matchesToPassPath=/home/kevin/Documents/win7share/features/refine.txt
-torlerantOfX=1
+matchesToPassPath=/home/kevin/Documents/win7share/exp/refine.txt
+torlerantOfX=2
 torlerantOfY=1
 
 #******************Surface Fitting******************
 #format of point cloud:      x     y     z
 pointCloudInPath=/home/kevin/Documents/win7share/exp/in.txt
 pointCloudOutPath=/home/kevin/Documents/win7share/exp/out.txt
+SFSearchRadius=25
+
+#******************Find Identity******************
+#	in_matches1-in_matches2=out_matches
+InMatchPath1=/home/kevin/Documents/win7share/exp/refine.txt
+InMatchPath2=/home/kevin/Documents/win7share/exp/minus.txt
+OutMatchPath=/home/kevin/Documents/win7share/exp/minus_result.txt
