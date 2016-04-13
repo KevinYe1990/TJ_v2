@@ -9,12 +9,12 @@
 #include <math.h>
 #include <vector>
 #include <stdlib.h>
+//#include <iomanip>
 //#include <typeindex>
 #include <unistd.h>
 #include <time.h>
 #include <stdarg.h>
-//OpenMP
-#include <omp.h>
+
 //Eigen 3.2.8
 #include "Eigen/Dense"
 //PCL 1.8
@@ -31,9 +31,24 @@
 #include "opencv2/core/eigen.hpp"
 //GDAL
 #include "gdal/gdal.h"
+#include "gdal/gdal_priv.h"
+#include "gdal/cpl_string.h"
+#include "gdal/gdalwarper.h"
+#include "gdal/gdal_pam.h"
+#include "gdal/cpl_conv.h"
 #include "gdal/ogr_api.h"
 #include "gdal/ogrsf_frmts.h"
 #include "gdal/ogr_spatialref.h"
+
+#define PI (2*asin(1))
+#define PROJECT_X_TO_BOTTOM(x) ((x)*pow(2.0,(double)(LevelInAll-current_level))-.5)
+#define PROJECT_Y_TO_BOTTOM(y) (-((y)*pow(2.0,(double)(LevelInAll-current_level)))+.5)
+#define CAL_VEL(py,angle) ((py)/sin((angle)*PI/180))
+#define GET_TIMES_VEL(py,angle) (CAL_VEL(py,angle)*pow(2.0,(double)(LevelInAll-current_level))*33.0*6.0)
+
+#ifndef _OPENMP
+#define _OPENMP
+#endif
 
 using namespace std;
 using namespace cv;
@@ -43,8 +58,10 @@ extern Mat img1,img2;
 extern char *filename;
 extern string directory;
 extern double imagescale;
+extern int current_level;
+extern int LevelInAll;
 
-enum MATCH_TYPE{UnderTerrainControl='1',UnderGlacierControl='2',RefineMatches='3'};
+enum MATCH_TYPE{UnderTerrainControl='1',UnderGlacierControl='2',RefineTerrainMatches='3',RefineGlacierMatches='4'};
 enum FEATURE_TYPE{GoodFeature='1',SiftFeature='2',GridFeature='3'};
 
 struct Match{
@@ -107,6 +124,7 @@ bool readConfigFile(const char *cfgfilepath, const string &key, bool &value);
 void readKeyPoints(const string filename,vector<cv::KeyPoint>& kpts);
 void readMatches(const string filename,vector<Match>& matches,bool withTitle=false,bool withCC=false, bool withWindowSize=false,
                  bool withArcgisCoor=false,bool withParaXY=false);
+void readRasterPixel(GDALDataset *poDataset,const double* geoInfo,double x, double y, double&val);
 
 void showImage(Mat &img,string title="TEST",double scale=1);
 void showKeypoints(const Mat img,const vector<KeyPoint> &kpts,double scale=1);
@@ -115,7 +133,7 @@ void showMatches(const Mat& leftImg,const Mat& rightImg,const vector<Match> matc
 void printKeypoints(std::string filename,const std::vector<cv::KeyPoint>& kpts);
 void printMatches(string filename,const vector<Match>& matches,int mode=0);
 void printShortMatches(string filename,const vector<Match>& matches,int mode=0);
-
+void printGlacierMatches(string filename,const vector<Match>& matches,int mode=0);
 void getPtsFromMatches(const vector<Match>& matches,vector<Point2f>& lpts,vector<Point2f>& rpts);
 void printShpfile(string shpname,const vector<Point2f>& pointSet,int EPSG=0);
 void printShpfile(string shpname,const vector<KeyPoint>& pointSet,int EPSG=0);

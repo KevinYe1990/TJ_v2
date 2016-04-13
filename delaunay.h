@@ -37,6 +37,8 @@ public:
     int getNumberOfTri(){return triangulation.size();}
     //check if the point is inside the certain triangle
     bool iswithinTri(const Point2f& pt,int tri_id);
+    //find the corresponding triangle
+    int findTri(const Point2f& pt);
     //interpolate the attribute
     double interpolateAttr(const Point2f& pt,int tri_id);
 

@@ -3,6 +3,8 @@
 ###paths of image pair
 img1Path=/home/kevin/Documents/win7share/9058_l3.tif
 img2Path=/home/kevin/Documents/win7share/9059_l3.tif
+CurrentLevel=3
+LevelInAll=5
 DisplayScale=1
 
 ###feature type:1)good feature; 2)fast feature; 3)grid feature
@@ -35,35 +37,43 @@ initXyStep=5
 #					2)Match under glacier constraints;
 #					3)Refine previous matching results
 
-featurePath=/home/kevin/Documents/win7share/exp/l2_features.txt
+featurePath=/home/kevin/Documents/win7share/exp/l3_t_features.txt
 matchesToPrintPath=/home/kevin/Documents/win7share/exp/matches.txt
 matchesShpToPrintPath=/home/kevin/Documents/win7share/exp/correspondences.shp
 PATH_OF_STAGE1=/home/kevin/Documents/win7share/exp/stage1.txt
 PATH_OF_STAGE2=/home/kevin/Documents/win7share/exp/stage2.txt
-windowSize=16
-corrThreshold=0.4
-paraYRangeFrom=-1
-paraYRangeTo=1
-displayMatches=true
+windowSize=32
+searchSize=40
+corrThreshold=0.3
+paraYRangeFrom=-1.5
+paraYRangeTo=1.5
+displayMatches=false
 saveMatchesAsTxt=true
 saveMatchesAsShp=false
 #*********Terrain Controls for Matching*********
-terrainCtrlsPath=/home/kevin/Documents/win7share/exp/l2c2.txt
-searchSize=52
-torOfEpipolar=1
+terrainCtrlsPath=/home/kevin/Documents/win7share/exp/l3_t_gcp.txt
+torOfEpipolar=2
 #*********refine correspondence candidates*********
 matchesToPassPath=/home/kevin/Documents/win7share/exp/refine.txt
-torlerantOfX=2
+torlerantOfX=1
 torlerantOfY=1
+torlerantOfVel=500
+CheckWithExtraVel=false
+resetParaY=true
+ExtraVelPath=/home/kevin/Documents/win7share/exp/raster/Rignot_Vel_Clip.tif
+#*********Glacier Controls for Matching*********
+FlowDirPath=/home/kevin/Documents/win7share/exp/raster/DIR_LEVEL3.tif
 
 #******************Surface Fitting******************
 #format of point cloud:      x     y     z
 pointCloudInPath=/home/kevin/Documents/win7share/exp/in.txt
 pointCloudOutPath=/home/kevin/Documents/win7share/exp/out.txt
 SFSearchRadius=25
-
+xxxx=790
+yyyy=628
 #******************Find Identity******************
 #	in_matches1-in_matches2=out_matches
 InMatchPath1=/home/kevin/Documents/win7share/exp/refine.txt
 InMatchPath2=/home/kevin/Documents/win7share/exp/minus.txt
 OutMatchPath=/home/kevin/Documents/win7share/exp/minus_result.txt
+

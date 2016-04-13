@@ -636,3 +636,59 @@ void printShortMatches(string filename, const vector<Match> &matches, int mode)
         exitwithErrors("Unable to open the output file!");
     cout<<matches.size()<<" correspondences were printed..."<<endl;
 }
+
+
+void readRasterPixel(GDALDataset *poDataset, const double* geoInfo,double target_x, double target_y, double &val)
+{
+    double x0,y0;
+    x0=geoInfo[0];
+    y0=geoInfo[3];
+
+    //transform to raster coordinates
+    double dx,dy;
+    dx=target_x-x0;
+    dy=target_y-y0;
+
+    int band=1;
+    //read pixel value
+    float buffer[1];
+
+    int x,y;
+    x=(int)(dx/geoInfo[1]);
+    y=(int)(dy/geoInfo[5]);
+
+    poDataset->RasterIO(GF_Read,x,y,1,1,(void *)buffer,1,1,GDT_Float32,1,&band,0,0,0);
+    val=(double)(*buffer);
+}
+
+
+void printGlacierMatches(string filename, const vector<Match> &matches, int mode)
+{
+    if(matches.size()==0) return;
+    ofstream out;
+    switch(mode){
+    case 0:
+        out.open(filename,ios::out);
+        out<<"F1\tF2\tF3\tF4\tMCC\tWindowSize\tPoint1_x\tPoint1_y\tPoint2_x\tPoint2_y\tParaX\tParaY\tAngle\tVelocity"<<endl;
+        break;
+    case 1:
+        out.open(filename,ios::app);
+        out<<endl;
+        break;
+    default:
+        exitwithErrors("Error occured while writing matching results!");
+    }
+
+    if(out.is_open()){
+        vector<Match>::const_iterator iter;
+        for(iter=matches.begin();iter!=matches.end();++iter){
+            out<<iter->p1.x<<"\t"<<iter->p1.y<<"\t"<<iter->p2.x<<"\t"<<iter->p2.y<<"\t"<<iter->corr<<"\t"<<iter->windowSize<<"\t"
+              <<iter->p1.x-.5<<"\t"<<-iter->p1.y+.5<<"\t"<<iter->p2.x-.5<<"\t"<<-iter->p2.y+.5<<"\t"
+              <<iter->getParaX()<<"\t"<<iter->getParaY()<<"\t"<<iter->angle<<"\t"<<iter->speed;
+            if(iter!=matches.end()-1) out<<endl;
+        }
+        out.close();
+    }else
+        exitwithErrors("Unable to open the output file!");
+    cout<<matches.size()<<" correspondences were printed..."<<endl;
+}

@@ -39,6 +39,15 @@ bool Delaunay::iswithinTri(const Point2f &pt, int tri_id)
     return pointPolygonTest(contour,pt,false)>0;
 }
 
+int Delaunay::findTri(const Point2f &pt)
+{
+    for(size_t i=0;i<triangulation.size();++i){
+        if(iswithinTri(pt,i))
+            return i;
+    }
+    return -1;
+}
+
 
 double Delaunay::interpolateAttr(const Point2f &pt, int tri_id){
     MatrixXd A(3,3);

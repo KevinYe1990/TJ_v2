@@ -147,8 +147,13 @@ void performMatching(char *type)
             vector<KeyPoint> features;
             readKeyPoints(featurePath,features);
             readMatches(terrainCtrlsPath,terrain);
+#ifdef _OPENMP
+            matchUnderTerrainControlOMP(img1,img2,terrain,features,matches,
+                                     windowSize,searchSize,torOfEpipolar,0);
+#else
             matchUnderTerrainControl(img1,img2,terrain,features,matches,
                                      windowSize,searchSize,torOfEpipolar,0);
+#endif
             filterOut(matches,corrThreshold);
             cout<<"Update the stage 1 file..."<<endl;
             updateTmpMatches(matches,PATH_OF_STAGE1);
@@ -159,9 +164,34 @@ void performMatching(char *type)
         }
         case UnderGlacierControl:
     {
+        string FlowDirPath;
+        double xxxx,yyyy;
+        readConfigFile(filename,"FlowDirPath",FlowDirPath);
+        readConfigFile(filename,"xxxx",xxxx);
+        readConfigFile(filename,"yyyy",yyyy);
+
+        //using GDAL
+        GDALDataset *poDataset;
+        double geoInfo[6];
+
+        //registration
+        GDALAllRegister();
+        //open raster dataset
+        poDataset=(GDALDataset *)GDALOpen(FlowDirPath.c_str(),GA_ReadOnly);
+        if(poDataset!=NULL){
+            //get the width and height of the raster
+            poDataset->GetGeoTransform(geoInfo);
+
+           double angle=-999;
+
+           readRasterPixel(poDataset,geoInfo,PROJECT_X_TO_BOTTOM(xxxx),PROJECT_Y_TO_BOTTOM(yyyy),angle);
+
+            cout<<angle<<endl;
+        }
+        delete poDataset;
             break;
         }
-        case RefineMatches:
+        case RefineTerrainMatches:
     {
             string matchesToPassPath;
             int torlerantOfX=1,torlerantOfY=1;
@@ -174,19 +204,88 @@ void performMatching(char *type)
             filterOut(matches,paraYRangeFrom,paraYRangeTo,1);
             break;
         }
+    case RefineGlacierMatches:
+    {
+        string matchesToPassPath;
+        int torlerantOfX=1,torlerantOfY=1;
+        double torlerantOfVel=300;
+        bool CheckWithExtraVel=false,resetParaY=false;
+        string ExtraVelPath,FlowDirPath;
+        readConfigFile(filename,"FlowDirPath",FlowDirPath);
+        readConfigFile(filename,"ExtraVelPath",ExtraVelPath);
+        readConfigFile(filename,"matchesToPassPath",matchesToPassPath);
+        readConfigFile(filename,"torlerantOfX",torlerantOfX);
+        readConfigFile(filename,"torlerantOfY",torlerantOfY);
+        readConfigFile(filename,"torlerantOfVel",torlerantOfVel);
+        readConfigFile(filename,"CheckWithExtraVel",CheckWithExtraVel);
+        readConfigFile(filename,"resetParaY",resetParaY);
+        readMatches(matchesToPassPath,matches);
+        refineMatches(img1,img2,matches,matches,windowSize,
+                      torlerantOfX,corrThreshold,resetParaY,torlerantOfY);
+
+        //using GDAL
+        GDALDataset *poDataset,*poVel;
+        double geoInfo[6];
+        double geoInfo_[6];
+        //registration
+        GDALAllRegister();
+        //open raster dataset
+        poDataset=(GDALDataset *)GDALOpen(FlowDirPath.c_str(),GA_ReadOnly);
+        poVel=(GDALDataset *)GDALOpen(ExtraVelPath.c_str(),GA_ReadOnly);
+        if(poDataset!=NULL){
+            //get the width and height of the raster
+            poDataset->GetGeoTransform(geoInfo);
+            poVel->GetGeoTransform(geoInfo_);
+            for(std::vector<Match>::iterator iter=matches.begin();iter!=matches.end();){
+                double angle=-999.;
+                readRasterPixel(poDataset,geoInfo,
+                                PROJECT_X_TO_BOTTOM(iter->p2.x),PROJECT_Y_TO_BOTTOM(iter->p2.y),angle);
+                double py=iter->getParaY();
+                iter->angle=angle;
+                //opposite direction
+                if(py*angle<0){
+                    iter=matches.erase(iter);
+                    continue;
+                }
+
+                //compared with external vel product
+
+                    double vel;
+                    vel=GET_TIMES_VEL(py,angle);
+                    double external_vel=-999.0;
+                    readRasterPixel(poVel,geoInfo_,
+                                    PROJECT_X_TO_BOTTOM(iter->p2.x),PROJECT_Y_TO_BOTTOM(iter->p2.y),external_vel);
+                    iter->speed=external_vel;
+                    if(CheckWithExtraVel){
+                        if(fabs(vel-external_vel)>torlerantOfVel){
+                            iter=matches.erase(iter);
+                            continue;
+                        }
+                    }
+                ++iter;
+            }
+        }
+
+        delete poDataset;
+        delete poVel;
+        break;
+    }
         default:{
             exitwithErrors("unknown type for matching!");
         }
     }
 
     if(displayMatches)  showMatches(img1,img2,matches,imagescale);
-
-    if(saveMatchesAsTxt) printMatches(matchesToPrintPath,matches,0);
+    if(type[0]==RefineGlacierMatches || type[0]==UnderGlacierControl)
+        printGlacierMatches(matchesToPrintPath,matches,0);
+    else if(saveMatchesAsTxt)
+        printMatches(matchesToPrintPath,matches,0);
     if(saveMatchesAsShp) printShpfile(matchesShpToPrintPath,matches);
 }
 
 
-bool printConfigFile(){
+bool printConfigFile()
+{
     ifstream in(filename);
     if(!in.is_open()) exitwithErrors("Error occured while opening the configuration file!");
     while(!in.eof()){
@@ -200,8 +299,7 @@ bool printConfigFile(){
 }
 
 
-void surfaceFitting(char *type)
-{
+void surfaceFitting(char *type){
     string pointCloudInPath,pointCloudOutPath;
     int SFSearchRadius=25;
     readConfigFile(filename,"pointCloudInPath",pointCloudInPath);
@@ -294,8 +392,7 @@ void surfaceFitting(char *type)
 }
 
 
-void getIdentityMatches()
-{
+void getIdentityMatches(){
     string InMatchPath1,InMatchPath2/*,OutMatchPath*/;
     readConfigFile(filename,"InMatchPath1",InMatchPath1);
     readConfigFile(filename,"InMatchPath2",InMatchPath2);

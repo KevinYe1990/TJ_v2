@@ -4,6 +4,10 @@
 #include "utils.h"
 #include "delaunay.h"
 
+//OpenMP
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 bool checkSize(const Mat& src,Rect range);
 
@@ -14,6 +18,10 @@ void nccMatch(const Mat &tpl, const Mat &src, Point2f &pt1, Point2f &pt2,
               double &maxCC, int& state,bool interpolation=true,double tolerance=1.0);
 
 void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vector<Match>& matches4Ctrls,
+                              vector<KeyPoint>& features,vector<Match>& matches,
+                              int windowSize=16,int searchSize=24,int torOfEpipolar=2,double mccThresh=0.8);
+
+void matchUnderTerrainControlOMP(const Mat& leftImg,const Mat& rightImg,const vector<Match>& matches4Ctrls,
                               vector<KeyPoint>& features,vector<Match>& matches,
                               int windowSize=16,int searchSize=24,int torOfEpipolar=2,double mccThresh=0.8);
 

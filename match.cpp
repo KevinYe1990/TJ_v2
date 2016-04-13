@@ -61,11 +61,11 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
     Delaunay tri(leftImg);
     tri.generateDelaunay(matches4Ctrls);
     //traversing the triangulation
-    int n=tri.getNumberOfTri();
+    size_t n=tri.getNumberOfTri();
     vector<bool> featureMask(features.size(),true);
-    for(int i=0;i<n;++i){
+    for(size_t i=0;i<n;++i){
         //find features within the triangle
-        for(int j=0;j<features.size();++j){
+        for(size_t j=0;j<features.size();++j){
             //traversing the features
             if(featureMask[j]){
                 if(tri.iswithinTri(features[j].pt,i)){
@@ -117,6 +117,83 @@ void matchUnderTerrainControl(const Mat& leftImg,const Mat& rightImg,const vecto
 
 
 
+void matchUnderTerrainControlOMP(const Mat &leftImg, const Mat &rightImg,
+                                 const vector<Match> &matches4Ctrls, vector<KeyPoint> &features,
+                                 vector<Match> &matches, int windowSize, int searchSize,
+                                 int torOfEpipolar, double mccThresh)
+{
+    //
+    matches.clear();
+    assert(windowSize%2==0);
+    assert(searchSize%2==0);
+    int shift=1;
+    int windowRadius=(windowSize/2);
+    int searchRadius=(searchSize/2);
+    Delaunay tri(leftImg);
+    tri.generateDelaunay(matches4Ctrls);
+    //traversing the triangulation
+    size_t n=tri.getNumberOfTri();
+    int thread_count=omp_get_num_threads();
+    size_t count=0,percent=0;
+    // Create temporaries for each thread in order to avoid synchronization
+    std::vector<std::vector<Match> > temp_matches(thread_count);
+    //for all features
+#pragma omp parallel for schedule (dynamic,1000) num_threads (thread_count)
+    for(size_t k=0;k<features.size();++k){
+        size_t tri_id=tri.findTri(features[k].pt);
+        if(tri_id!=-1){
+            //feature inside the triangle
+            Point2f feature=features[k].pt;
+            double disparity=tri.interpolateAttr(feature,tri_id);
+            Point2i PointOfLeftImg,PointOfRightImg;
+            PointOfLeftImg=Point2i(floor(feature.x-windowRadius),floor(feature.y-windowRadius));
+            //************************NOTE:***********************
+            //one pixel shift
+            PointOfRightImg=Point2i(floor(feature.x-disparity-searchRadius-shift),
+                                    floor(feature.y-torOfEpipolar-windowRadius-shift));
+            //*****************************************************
+            //check if the range is beyond the range of the left image
+            Rect templateRange(PointOfLeftImg,Size(windowRadius*2,windowRadius*2));
+            //enlarge by one+one pixel
+            Rect searchRange(PointOfRightImg,Size((searchRadius+shift)*2,
+                                                  (torOfEpipolar+windowRadius+shift)*2));
+            if(checkSize(leftImg,templateRange) && checkSize(rightImg,searchRange)){
+                //crop the patches
+                Mat templ=leftImg(templateRange);
+                Mat search=rightImg(searchRange);
+                //normalized correlation coefficient(NCC)
+                int state=0;
+                double mcc;
+                cv::Point2f pt1,pt2;
+                nccMatch(templ,search,pt1,pt2,mcc,state);
+                if(state){
+                    //remove candidates with low correlation coefficient
+                    if(mcc>=mccThresh){
+                        Match match;
+                        match.p1=feature;
+                        match.p2=Point2f(PointOfRightImg.x,PointOfRightImg.y)+pt2;
+                        match.corr=mcc;
+                        match.windowSize=windowSize;
+                        if(fabs(match.p1.y-match.p2.y)<=torOfEpipolar){
+                            //  This thread's ID (range 0 to threads-1)
+                            int tn=omp_get_thread_num();
+                            //Y parallax constraint
+                            temp_matches[tn].push_back(match);
+                        }
+                    }
+                }
+            }
+        }
+
+        count+=1;
+        if((count*100/features.size()-percent)>=1)
+            printf("%2.2d%% of matching process finished...\n",++percent);
+    }
+
+    // Combine all threads' results into the matches
+    for (unsigned int tn = 0; tn < thread_count; ++tn)
+    matches.insert (matches.end (), temp_matches[tn].begin (), temp_matches[tn].end ());
+}
 
 
 Mat ransacTest(const vector<Match> &src, vector<Match> &dst,int method,double minDistance,double confidence)
@@ -273,3 +350,5 @@ bool compMatches(const Match &m1, const Match &m2)
             return false;
     }
 }
+
+
